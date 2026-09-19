@@ -1281,7 +1281,7 @@ class RecipeRenderer:
         text-transform: uppercase;
         letter-spacing: 0.12em;
         color: #59615f;
-        border-bottom: 1.5pt solid #47664a;
+        border-bottom: 1pt solid #47664a;
         opacity: 0.8;
         text-align: left;
         padding: 0.35rem 0.6rem;

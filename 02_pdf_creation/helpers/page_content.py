@@ -193,6 +193,7 @@ class ContentPageRenderer:
         margin-bottom: 0.35rem;
         margin-top: 0.75rem;
         color: #47664a;
+        display: inline-block;
         border-bottom: 2px solid rgba(71, 102, 74, 0.4);
         padding-bottom: 0.125rem;
     }
@@ -255,7 +256,7 @@ class ContentPageRenderer:
         text-transform: uppercase;
         letter-spacing: 0.12em;
         color: #59615f;
-        border-bottom: 1.5pt solid #47664a;
+        border-bottom: 1pt solid #47664a;
         opacity: 0.8;
         text-align: left;
     }

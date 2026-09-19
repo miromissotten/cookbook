@@ -42,6 +42,10 @@ def display_parts(name: str) -> Tuple[str, str]:
 # ("x.x.x." and beyond) are omitted from the table of contents.
 TOC_MAX_DEPTH = 2
 
+# Max depth for the full TOC pages inserted before the outro: effectively
+# unlimited so every page in the book appears somewhere in the back matter.
+FULL_TOC_MAX_DEPTH = 99
+
 
 def _numbering_depth(name: str) -> int:
     """Numbering depth of an entry, counted from its position label.
@@ -132,9 +136,32 @@ class TOCPageRenderer:
         Returns:
             Complete HTML page
         """
-        # Generate TOC HTML
         toc_html = self._generate_toc_html(sections, link_resolver)
 
+        return self._get_html_template().format(
+            title=title, toc_content=toc_html,
+            clean_title_id=clean_title_id(title))
+
+    def render_full_toc(self, title: str, sections: List[Dict],
+                        link_resolver=None) -> str:
+        """Render an uncapped TOC page to HTML.
+
+        Like ``render`` but shows every entry regardless of numbering depth,
+        using the chapter sub-TOC hierarchy style so deep nesting stays
+        legible. Used for the back-matter full TOC inserted before the outro.
+        """
+        html_parts = ['<div class="toc-hierarchy content-text">']
+        for section in sections:
+            section_name = section.get("name", "Untitled")
+            if _numbering_depth(section_name) > FULL_TOC_MAX_DEPTH:
+                continue
+            # Include the section itself so its header renders in the hierarchy
+            # at depth 1; nest_entries_by_position handles all descendants.
+            nested = nest_entries_by_position([section])
+            self._append_hierarchy_rows(html_parts, nested, link_resolver,
+                                        FULL_TOC_MAX_DEPTH)
+        html_parts.append('</div>')
+        toc_html = "\n".join(html_parts)
         return self._get_html_template().format(
             title=title, toc_content=toc_html,
             clean_title_id=clean_title_id(title))
@@ -218,17 +245,15 @@ class TOCPageRenderer:
                 )
         return inner, None
 
-    def _generate_toc_html(self, sections: List[Dict], link_resolver=None) -> str:
+    def _generate_toc_html(self, sections: List[Dict], link_resolver=None,
+                           max_depth: int = TOC_MAX_DEPTH) -> str:
         """Generate the main TOC as a hierarchy of accent rows.
 
         Each chapter prints as a full-width accent bar; its depth-2 entries
         (subsections and chapter-level items) descend beneath it as indented
         accent rows - the same level language the chapter sub-TOCs use, so
         the book's two navigation pages speak one visual hierarchy. Entries
-        numbered deeper than ``TOC_MAX_DEPTH`` ("x.x.x." and beyond when the
-        cap is 2) are omitted: the full tree lives on the chapter pages.
-        Chapter sub-TOCs use ``_generate_chapter_tree_html`` instead and keep
-        their own ``.toc-hierarchy`` container.
+        numbered deeper than ``max_depth`` are omitted.
         """
         html_parts = ['<div class="toc-main-toc content-text">']
 
@@ -236,7 +261,7 @@ class TOCPageRenderer:
             section_name = section.get("name", "Untitled")
             children = section.get("children", [])
 
-            if _numbering_depth(section_name) > TOC_MAX_DEPTH:
+            if _numbering_depth(section_name) > max_depth:
                 continue
 
             pos_label, _ = display_parts(section_name)
@@ -259,7 +284,7 @@ class TOCPageRenderer:
                     else:
                         child_name = str(child)
 
-                    if _numbering_depth(child_name) > TOC_MAX_DEPTH:
+                    if _numbering_depth(child_name) > max_depth:
                         continue
 
                     if isinstance(child, dict) and child.get("type") == "subsection":
@@ -304,9 +329,10 @@ class TOCPageRenderer:
                                link_resolver, max_depth: int) -> None:
         """Emit rows for a nested chapter subtree with clear visual hierarchy.
 
-        Level 2 (e.g., "2.1 Broth"): Card-style section header
-        Level 3 (e.g., "2.1.1 Sub-item"): Medium-weight row with left accent
-        Level 4+ (e.g., "2.1.1.1 Deep item"): Indented with dot leader
+        Level 1 (chapter): Prominent full-width bar
+        Level 2 (subsections): Card-style section header
+        Level 3 (sub-items): Medium-weight row with left accent
+        Level 4+ (deep items): Indented with dot leader
         """
         for entry in entries:
             name = _entry_name(entry)
@@ -316,7 +342,11 @@ class TOCPageRenderer:
             inner, target = self._entry_link(name, link_resolver)
             tgt = f' data-toc-target="{target}"' if target else ''
 
-            if depth <= 2:
+            if depth == 1:
+                html_parts.append(
+                    f'<div class="toc-level-1 toc-section-header"{tgt}>'
+                    f'{inner}</div>')
+            elif depth <= 2:
                 # Level 2: Card-style section header
                 html_parts.append(
                     f'<div class="toc-level-2 toc-section-header"{tgt}>'
@@ -501,6 +531,36 @@ class TOCPageRenderer:
     /* ---- CHAPTER SUB-TOC: CLEAR HIERARCHY ---- */
     .toc-hierarchy {{
         padding-left: 5mm;
+    }}
+    /* Level 1: Chapter headers - prominent full-width bar */
+    .toc-hierarchy .toc-level-1 {{
+        background: #47664a;
+        color: #ffffff;
+        padding: 1rem 1.25rem;
+        margin-top: 2rem;
+        margin-bottom: 0.75rem;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(71, 102, 74, 0.25);
+    }}
+    .toc-hierarchy .toc-level-1:first-child {{
+        margin-top: 0;
+    }}
+    .toc-hierarchy .toc-level-1 .toc-entry-text {{
+        font-family: 'Manrope', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }}
+    .toc-hierarchy .toc-level-1 .toc-pos {{
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.15rem 0.4rem;
+        border-radius: 3px;
+        font-weight: 600;
+        font-size: 0.72rem;
     }}
     /* Level 2: Section headers - card style with colored background */
     .toc-hierarchy .toc-level-2 {{

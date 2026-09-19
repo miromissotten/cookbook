@@ -253,6 +253,37 @@ _JS_SPLITTER_TEMPLATE = r"""
     col.units = expanded.filter(n => n.nodeType === 1);
   });
   cols.forEach(col => {
+    if (col.key !== 'main' || kind === 'recipe') return;
+    const expanded = [];
+    col.units.forEach(unit => {
+      if (!/^(ul|ol)$/i.test(unit.tagName)) { expanded.push(unit); return; }
+      if (unit.getBoundingClientRect().height <= 380) { expanded.push(unit); return; }
+      const lis = Array.from(unit.children).filter(n => n.nodeType === 1);
+      if (!lis.length) { expanded.push(unit); return; }
+      const chunks = [];
+      let cur = null, curH = 0;
+      const newChunk = () => {
+        cur = document.createElement(unit.tagName);
+        cur.className = unit.className;
+        chunks.push(cur);
+        curH = 0;
+      };
+      lis.forEach(li => {
+        const h = li.getBoundingClientRect().height;
+        if (!cur || curH + h > 380) newChunk();
+        cur.appendChild(li);
+        curH += h;
+      });
+      if (chunks.length > 1) {
+        unit.replaceWith(...chunks);
+        expanded.push(...chunks);
+      } else {
+        expanded.push(unit);
+      }
+    });
+    col.units = expanded.filter(n => n.nodeType === 1);
+  });
+  cols.forEach(col => {
     col.units = col.units.filter(u => !u.hasAttribute('data-page-footer')
                                      && !u.classList.contains('page-footer'));
   });
