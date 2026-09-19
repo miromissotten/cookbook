@@ -193,8 +193,8 @@ class ContentPageRenderer:
         margin-bottom: 0.35rem;
         margin-top: 0.75rem;
         color: #47664a;
-        border-left: 2px solid rgba(71, 102, 74, 0.4);
-        padding-left: 0.5rem;
+        border-bottom: 2px solid rgba(71, 102, 74, 0.4);
+        padding-bottom: 0.125rem;
     }
     .content-text p {
         margin-bottom: 0.75rem;
