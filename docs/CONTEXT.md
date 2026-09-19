@@ -262,3 +262,10 @@ Conversion-time check that a sheet's webfonts and Tailwind actually loaded befor
 
 **Vendored fonts**:
 The print families (Manrope, Work Sans, Plus Jakarta Sans, Material Symbols Outlined) stored in `lib/fonts/` and referenced locally by every sheet template, so conversion never fetches fonts from the network (ADR 0018).
+
+**Graph marker**:
+An authored `==GRAPH_<KIND>_START/END==` block holding a markdown pipe-table that the build renders into a picture before the sheet is measured; `<KIND>` selects the chart (`SCATTERPLOT`, `RADARGRAPH`). A block that cannot be drawn is reported and left visible instead of failing the build (ADR 0025).
+
+**Radar graph**:
+The six-axis (acid, richness, sweet, umami, heat, thickness) 0-5 taste profile a sauce authors under `### RadarGraph`; rendered as a chart and printed in the recipe header beneath the sauce profile chips, because the shape says what the chips' words cannot (ADR 0025).
+_Avoid_: spider chart, taste wheel

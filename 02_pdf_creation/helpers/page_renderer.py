@@ -49,6 +49,13 @@ class RecipeParser:
     # lines are prose lead-ins. Threshold lives in config so the parser
     # and any future callers share one source of truth.
     VARIANT_LABEL_MAX_WORDS = VARIANT_LABEL_MAX_WORDS
+    # The authored radar-chart block: a "### RadarGraph" section whose table
+    # (axis names + one 0-5 value row) is rendered into a chart by the
+    # generator, which owns the build's working folder (see graph_radar).
+    RADAR_GRAPH_RE = re.compile(
+        r'==GRAPH_RADARGRAPH_START==\n(.*?)==GRAPH_RADARGRAPH_END==',
+        re.DOTALL
+    )
     
     def __init__(self):
         pass
@@ -79,6 +86,7 @@ class RecipeParser:
         self._parse_side_info(content, recipe, diagnostics)
         self._parse_dietary_restrictions(content, recipe, diagnostics)
         self._parse_description(content, recipe, diagnostics)
+        self._parse_radar_graph(content, recipe)
 
         # Parse ingredients - handle nested structure based on indentation
         ingredients_section = re.search(r'^### Ingredients\s*\n(.*?)(?=^### |\Z)', content, re.MULTILINE | re.DOTALL)
@@ -277,6 +285,21 @@ class RecipeParser:
             return
         recipe['description'] = description
 
+    def _parse_radar_graph(self, content: str, recipe: Dict) -> None:
+        """Lift an authored radar-chart table into ``recipe['radar_graph']``.
+
+        Only the raw table text is kept; turning it into a picture is the
+        generator's job, because that needs the build's working folder. A page
+        without the marker block (or with an empty one) simply carries no chart,
+        which is not worth a diagnostic: the chart is an optional extra.
+        """
+        match = self.RADAR_GRAPH_RE.search(content)
+        if not match:
+            return
+        table_text = match.group(1).strip()
+        if table_text:
+            recipe['radar_graph'] = table_text
+
     def _parse_list_with_indentation(self, text: str) -> List[Dict]:
         """Parse list with proper indentation handling for nested items."""
         lines = text.split('\n')
@@ -434,12 +457,15 @@ class RecipeRenderer:
             'hard': ['icon_difficulty_3.png'],
         }
     
-    def render_html(self, recipe: Dict, position_label: str = '') -> str:
+    def render_html(self, recipe: Dict, position_label: str = '',
+                    radar_img_html: str = '') -> str:
         """Render recipe data into HTML string.
 
         Args:
             recipe: Parsed recipe dictionary
             position_label: Numbering label to display before the title (e.g., "1.1.1.")
+            radar_img_html: ``<img>`` tag of the recipe's rendered radar chart,
+                or '' when the page authored no chart (see graph_radar)
         """
         # Generate icon HTML
         icons_html = self._generate_icons_html(recipe)
@@ -480,6 +506,9 @@ class RecipeRenderer:
         # Sauce profile group (only when at least one profile field exists)
         profile_chips_html = self._generate_sauce_profile_group_html(recipe)
 
+        # Taste-profile chart, printed under those chips
+        radar_block_html = self._generate_radar_html(radar_img_html)
+
         # Generate HTML template
         html_template = self._get_html_template()
 
@@ -495,6 +524,7 @@ class RecipeRenderer:
             origin_block=origin_html,
             description_block=description_html,
             profile_chips=profile_chips_html,
+            radar_block=radar_block_html,
             icons=icons_html,
             sidebar_block=sidebar_block,
             instructions=instructions_html,
@@ -1079,6 +1109,21 @@ class RecipeRenderer:
             return 'Sauce profile'
         return 'Sauce pairing'
 
+    def _generate_radar_html(self, radar_img_html: str) -> str:
+        """Print the authored radar chart under the sauce profile chips.
+
+        Written only when the generator actually produced a picture, so a page
+        without an authored radar table - or one whose table failed to render -
+        carries no empty frame and no placeholder text.
+        """
+        if not radar_img_html:
+            return ''
+        return (
+            '<div class="mt-1" data-radar-graph>\n'
+            f'{radar_img_html}\n'
+            '</div>'
+        )
+
     def _generate_side_info_html(self, recipe: Dict) -> str:
         """Generate HTML for side info."""
         info_items = []
@@ -1337,6 +1382,7 @@ class RecipeRenderer:
 {side_info}
 {description_block}
 {profile_chips}
+{radar_block}
 <div class="h-[1px] w-full bg-primary/20 mt-2"></div>
 </div>
 <!-- Icon Box -->

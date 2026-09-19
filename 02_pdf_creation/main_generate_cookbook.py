@@ -49,6 +49,7 @@ from html_to_pdf import (
 )
 from mermaid_renderer import bake_mermaid_in_file
 from graph_scatterplot import render_scatterplot_png
+from graph_radar import render_radar_png, PRINT_WIDTH_MM
 from generation_report import render_report_markdown
 from report_summary import summarize_diagnostics
 from link_injection import (
@@ -65,7 +66,7 @@ from config import (
     PAGE_NUMBER_Y_POSITION,
 )
 from input_roots import PathSpec, find_file, resolve_roots
-from helpers.logging import progress, info, warn, error, fatal
+from helpers.console_logging import progress, info, warn, error, fatal
 
 # [[Page]] or [[Page|shown text]] - Obsidian wiki links in source content.
 # The negative lookbehind keeps ![[embed]] out of the page-link pass.
@@ -375,33 +376,77 @@ class CookbookGenerator:
         return (f'<img src="{file_uri}" alt="{filename}" '
                 f'style="max-width:100%;height:auto" />')
 
-    def _replace_graph_scatterplot_markers(self, text: str) -> str:
-        """Replace ==GRAPH_SCATTERPLOT_START/END== blocks with rendered scatterplot images.
+    # Marker kinds of the ==GRAPH_<KIND>_START/END== convention: each block
+    # holds a markdown pipe-table that its renderer turns into a PNG.
+    SCATTERPLOT_KIND = 'SCATTERPLOT'
+    RADAR_KIND = 'RADARGRAPH'
+    # A scatterplot fills the column it sits in; a radar chart is a small
+    # square pinned under the flavour metadata it describes. Its width comes
+    # from graph_radar, which draws the chart at exactly that printed size.
+    SCATTERPLOT_IMG_STYLE = 'max-width:100%;height:auto'
+    RADAR_IMG_STYLE = f'width:{PRINT_WIDTH_MM}mm;height:auto'
+    RADAR_IMG_ALT = 'Radar chart of the flavour profile'
+
+    def _graph_block_to_img(self, table_text: str, kind: str, renderer,
+                            alt: str, style: str) -> str:
+        """Render one graph table into an ``<img>`` tag, or '' when it fails.
+
+        A graph that cannot be drawn must never take the build down: the reason
+        is reported and the page simply prints without that picture.
+        """
+        try:
+            png_path = self.temp_dir / f"{kind.lower()}_{uuid.uuid4().hex}.png"
+            png_uri = renderer(table_text, str(png_path))
+        except Exception as exc:
+            warn(f"Could not render {kind.lower()} graph: {exc}")
+            return ''
+        return f'<img src="{png_uri}" alt="{alt}" style="{style}" />'
+
+    def _replace_graph_markers(self, text: str, kind: str, renderer,
+                               alt: str, style: str) -> str:
+        """Replace ==GRAPH_<kind>_START/END== blocks with rendered graph images.
 
         If rendering fails for any reason, the original marker block is left
         in the text so it degrades to visible raw text instead of crashing
         the build.
         """
         def _replace(match: re.Match) -> str:
-            table_text = match.group(1).strip()
-            try:
-                png_path = self.temp_dir / f"scatter_{uuid.uuid4().hex}.png"
-                png_uri = render_scatterplot_png(table_text, str(png_path))
-                return (
-                    f'<img src="{png_uri}" '
-                    f'alt="Scatterplot" '
-                    f'style="max-width:100%;height:auto" />'
-                )
-            except Exception as exc:
-                warn(f"Could not render scatterplot: {exc}")
-                return match.group(0)
+            img_html = self._graph_block_to_img(
+                match.group(1).strip(), kind, renderer, alt, style)
+            return img_html or match.group(0)
 
         return re.sub(
-            r'==GRAPH_SCATTERPLOT_START==\n(.*?)==GRAPH_SCATTERPLOT_END==',
+            rf'==GRAPH_{kind}_START==\n(.*?)==GRAPH_{kind}_END==',
             _replace,
             text,
             flags=re.DOTALL,
         )
+
+    def _replace_graph_scatterplot_markers(self, text: str) -> str:
+        """Replace authored scatterplot blocks with rendered images."""
+        return self._replace_graph_markers(
+            text, self.SCATTERPLOT_KIND, render_scatterplot_png, 'Scatterplot',
+            self.SCATTERPLOT_IMG_STYLE)
+
+    def _replace_graph_radargraph_markers(self, text: str) -> str:
+        """Replace authored radar-chart blocks with rendered images."""
+        return self._replace_graph_markers(
+            text, self.RADAR_KIND, render_radar_png, self.RADAR_IMG_ALT,
+            self.RADAR_IMG_STYLE)
+
+    def _radar_graph_html(self, recipe: Dict) -> str:
+        """``<img>`` tag for a recipe's authored radar chart, or '' when none.
+
+        Recipe pages are built from parsed data rather than from raw markdown,
+        so their marker block never travels through ``markdown_to_html``; the
+        chart is rendered here and handed to the renderer instead.
+        """
+        table_text = recipe.get('radar_graph')
+        if not table_text:
+            return ''
+        return self._graph_block_to_img(
+            table_text, self.RADAR_KIND, render_radar_png, self.RADAR_IMG_ALT,
+            self.RADAR_IMG_STYLE)
     
     def _resolve_wiki_page(self, page_ref: str) -> Tuple[str, Optional[str]]:
         """Resolve a wiki-link page reference to (page_id, display_title).
@@ -502,6 +547,10 @@ class CookbookGenerator:
         # scatterplot <img> tags BEFORE mermaid extraction / markdown conversion
         # so the img tag survives md.convert() unchanged.
         markdown_text = self._replace_graph_scatterplot_markers(markdown_text)
+
+        # Radar charts travel through this path as well, so a content page can
+        # carry one without the recipe-only wiring above.
+        markdown_text = self._replace_graph_radargraph_markers(markdown_text)
 
         # Handle Mermaid diagrams BEFORE markdown conversion.
         # Extract mermaid blocks, replace with safe placeholder text that survives
@@ -645,7 +694,11 @@ class CookbookGenerator:
             # e.g., "_1.1.1. Ramen.md" -> "1.1.1."
             position_label = self._extract_position_label(filename)
 
-            html_content = self.recipe_renderer.render_html(recipe, position_label)
+            # The radar chart is an image, so it must exist before the template
+            # renders; a page without an authored chart passes '' through.
+            radar_img_html = self._radar_graph_html(recipe)
+            html_content = self.recipe_renderer.render_html(recipe, position_label,
+                                                            radar_img_html)
 
             # Process wiki links in the rendered HTML. Self-links (the page
             # referencing itself) degrade to styled text, so derive the same
