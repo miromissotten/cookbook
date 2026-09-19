@@ -3,7 +3,7 @@ from pathlib import Path
 
 import streamlit as st
 
-from .cookbook_adapt_bulk import export_metadata_to_excel, update_metadata_from_excel, export_subheader_overview, rename_markdown_subheader
+from .cookbook_adapt_bulk import export_metadata_to_excel, update_metadata_from_excel, export_subheader_overview
 
 
 def obsidian_cookbook(cookbook_path: Path, text_dir_path: Path, text_notdone_dir_path: Path):
@@ -43,23 +43,6 @@ def obsidian_cookbook(cookbook_path: Path, text_dir_path: Path, text_notdone_dir
             os.startfile(cookbook_path)
             st.success(f"✅ {cookbook_path.name} opened")
 
-    st.subheader("Rename subheaders")
-    col1, col2, col3 = st.columns([1, 1, 1])
-    i_naming = [col1.text_input("Old subheader title"), col2.text_input("New subheader title")]
-    if col3.button("Rename subheaders"):
-        try:
-            for source_label, dir_path in text_dir_pairs:
-                rename_markdown_subheader(
-                    cookbook_path=cookbook_path,
-                    text_dir_path=dir_path,
-                    pages_index_path=pages_index_path,
-                    old_title=i_naming[0],
-                    new_title=i_naming[1],
-                )
-            st.success("✅ Subheaders renamed successfully!")
-        except Exception as e:
-            st.error(f"Failed to rename subheaders: {e}")
-
     st.subheader("Subheader overview")
     col1, col2, col3 = st.columns([1, 1, 1])
     subheaders_path = paths["subheaders"]
@@ -92,7 +75,6 @@ def obsidian_cookbook(cookbook_path: Path, text_dir_path: Path, text_notdone_dir
             st.rerun()
 
     st.subheader("Complete subheaders in bulk")
-    st.warning("these sections depend on the info present in the generated book structure (page index). please reload if unsure if it's the latest version.")
     for section in subheader_sections:
         label = section["label"]
         excel_path = section["path"]
