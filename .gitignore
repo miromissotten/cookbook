@@ -1,0 +1,11 @@
+exports/
+.kilo
+
+# Python bytecode / interpreter caches
+__pycache__/
+*.py[cod]
+*.pyc.*
+.pytest_cache/
+
+# captured test/build logs
+*.out

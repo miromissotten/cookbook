@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" width="1052.4" height="744.09" version="1.0">
+ <defs>
+  <marker id="Arrow2Mend" overflow="visible" orient="auto">
+   <path transform="scale(.6) rotate(180) translate(-5)" d="m8.7186 4.0337-10.926-4.0177 10.926-4.0177c-1.7455 2.3721-1.7354 5.6175-6e-7 8.0354z" fill-rule="evenodd" stroke-linejoin="round" stroke-width=".625"/>
+  </marker>
+ </defs>
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <path d="m18.041 105.06h1022.5c2.2628 0 4.0845 1.8217 4.0845 4.0845v536.39c0 2.2628-1.8217 4.0845-4.0845 4.0845h-1022.5c-2.2628 0-4.0845-1.8217-4.0845-4.0845v-536.39c0-2.2628 1.8217-4.0845 4.0845-4.0845z" fill="#fff"/>
+ <path d="m940.31 118.17h89.781v523.01h-89.781z" fill="#ffce85" opacity=".58599" stroke-width="0"/>
+ <g fill="#ddffa9" stroke-width="0">
+  <path d="m729.01 118.23h85.236v523.01h-85.236z" opacity=".58599"/>
+  <path d="m367.95 118.24h81.628v523.01h-81.628z" opacity=".58599"/>
+  <path d="m530.31 118.54h82.299v523.01h-82.299z" opacity=".58599"/>
+  <path d="m128.52 118.94h157.91v523.01h-157.91z" opacity=".58599"/>
+ </g>
+ <path d="m539.4 297.26h66.474v33.237h-66.474v-33.237z" fill="#fce94f"/>
+ <path d="m826.7 142.39h66.474v33.237h-66.474v-33.237z" fill="#c17d11"/>
+ <path d="m826.7 179.37h66.474v33.237h-66.474v-33.237z" fill="#c17d11"/>
+ <path d="m179.07 449.26h66.474v33.237h-66.474v-33.237z" fill="#729fcf"/>
+ <path d="m375.55 464.68h66.474v33.237h-66.474v-33.237z" fill="#ef2929"/>
+ <path d="m375.55 405.47h66.474v33.237h-66.474v-33.237z" fill="#fcaf3e"/>
+ <path d="m293.25 464.46h66.474v33.237h-66.474v-33.237z" fill="#ef2929"/>
+ <path d="m293.13 501.87h148.89v33.237h-148.89v-33.237z" fill="#ef2929"/>
+ <path d="m294 405.67h66.474v33.237h-66.474v-33.237z" fill="#fcaf3e"/>
+ <path d="m620.09 464.68h66.474v33.237h-66.474v-33.237z" fill="#ef2929"/>
+ <path d="m620.09 297.26h66.474v33.237h-66.474v-33.237z" fill="#fce94f"/>
+ <path d="m656.31 256.42h66.474v33.237h-66.474v-33.237z" fill="#cee14b"/>
+ <path d="m620.09 219.69h66.474v33.237h-66.474v-33.237z" fill="#cee14b"/>
+ <path d="m656.31 423.83h66.474v33.237h-66.474v-33.237z" fill="#fcaf3e"/>
+ <path d="m620.09 387.1h66.474v33.237h-66.474v-33.237z" fill="#fcaf3e"/>
+ <path d="m737.55 347.2h66.474v33.237h-66.474v-33.237z" fill="#d3d7cf"/>
+ <path d="m737.55 484.97h66.474v33.237h-66.474v-33.237z" fill="#ef2929"/>
+ <path d="m737.55 297.26h66.474v33.237h-66.474v-33.237z" fill="#fce94f"/>
+ <path d="m737.55 238.06h66.474v33.237h-66.474v-33.237z" fill="#cee14b"/>
+ <path d="m737.55 405.47h66.474v33.237h-66.474v-33.237z" fill="#fcaf3e"/>
+ <path d="m456.98 219.57h66.474v33.237h-66.474v-33.237z" fill="#cee14b"/>
+ <path d="m456.98 256.55h66.474v33.237h-66.474v-33.237z" fill="#cee14b"/>
+ <path d="m456.98 386.98h66.474v33.237h-66.474v-33.237z" fill="#fcaf3e"/>
+ <path d="m456.98 423.96h66.474v33.237h-66.474v-33.237z" fill="#fcaf3e"/>
+ <path d="m152.47 411.34h66.474v33.237h-66.474v-33.237z" fill="#729fcf"/>
+ <path d="m825.31 424.06h66.474v33.237h-66.474v-33.237z" fill="#fcaf3e"/>
+ <g stroke="#000" stroke-width=".74818">
+  <path d="m945.86 347.59h78.347v33.237h-78.347v-33.237z" fill="#d3d7cf"/>
+  <path d="m945.86 485.35h78.347v33.237h-78.347v-33.237z" fill="#ef2929"/>
+  <path d="m945.86 296.96h78.347v33.237h-78.347v-33.237z" fill="#fce94f"/>
+  <path d="m945.86 237.76h78.347v33.237h-78.347v-33.237z" fill="#cee14b"/>
+  <path d="m945.86 405.86h78.347v33.237h-78.347v-33.237z" fill="#fcaf3e"/>
+  <path d="m945.86 160.84h78.347v33.237h-78.347v-33.237z" fill="#c17d11"/>
+ </g>
+ <g fill="none" stroke="#000">
+  <g>
+   <path d="m360.85 423.82 11.681-0.0143" marker-end="url(#Arrow2Mend)" stroke-width=".869"/>
+   <path d="m448.25 403.46 6.4834-0.0143" marker-end="url(#Arrow2Mend)" stroke-width=".86975"/>
+   <path d="m448.27 441.83 6.2857-0.0143" marker-end="url(#Arrow2Mend)" stroke-width=".86975"/>
+   <path d="m448.27 403.43v38.637" stroke-width=".86975"/>
+   <path d="m442.02 422.13h5.9854" stroke-width=".86975"/>
+   <path d="m360.09 481.77 12.127-0.0143" marker-end="url(#Arrow2Mend)" stroke-width=".869"/>
+   <path d="m442.71 481.33 173.6-0.012" marker-end="url(#Arrow2Mend)" stroke-width=".8057"/>
+   <path d="m523.91 403.85h93.643" marker-end="url(#Arrow2Mend)" stroke-width=".87256"/>
+   <g stroke-width=".869">
+    <path d="m522.82 440.83h47.883v-37.409"/>
+    <path d="m523.88 236.6h93.643" marker-end="url(#Arrow2Mend)"/>
+    <path d="m522.8 273.58h47.883v-37.409"/>
+   </g>
+   <path d="m804.01 254.74 137.97 0.25886" marker-end="url(#Arrow2Mend)" stroke-width=".83206"/>
+   <path d="m804.01 313.94 137.97 0.25885" marker-end="url(#Arrow2Mend)" stroke-width=".869"/>
+   <g stroke-width=".83206">
+    <path d="m804.01 363.88 137.97 0.25885" marker-end="url(#Arrow2Mend)"/>
+    <path d="m804.01 418.01 137.97 0.25886" marker-end="url(#Arrow2Mend)"/>
+    <path d="m804.01 501.65 137.97 0.24977" marker-end="url(#Arrow2Mend)"/>
+   </g>
+   <path d="m107.92 390.43-0.10932-137.05" stroke-width=".869"/>
+   <path d="m447.6 254.03-339.64-0.1448" stroke-width=".86975"/>
+   <g stroke-width=".869">
+    <path d="m605.81 313.88h11.89" marker-end="url(#Arrow2Mend)"/>
+    <path d="m686.54 313.88h47.968" marker-end="url(#Arrow2Mend)"/>
+    <path d="m286.52 481.85 4.1889-0.0143" marker-end="url(#Arrow2Mend)"/>
+    <path d="m286.53 520.22 4.0611-0.0143" marker-end="url(#Arrow2Mend)"/>
+   </g>
+   <path d="m286.53 481.82v38.637" stroke-width=".869"/>
+   <path d="m721.84 449.93h48.631v-7.5312" marker-end="url(#Arrow2Mend)" stroke-width=".87069"/>
+   <path d="m633.49 420.38v21.01h18.654" marker-end="url(#Arrow2Mend)" stroke-width=".89036"/>
+   <path d="m634.62 252.75v20.546h18.602" marker-end="url(#Arrow2Mend)" stroke-width=".869"/>
+   <path d="m722.96 282.04h48.631v-7.5568" marker-end="url(#Arrow2Mend)" stroke-width=".82848"/>
+   <g stroke-width=".869">
+    <path d="m686.96 245.45h47.592" marker-end="url(#Arrow2Mend)"/>
+    <path d="m685.91 412.83h48.553" marker-end="url(#Arrow2Mend)"/>
+    <path d="m441.27 519.01h270.45v-37.777h-24.742"/>
+    <path d="m711.69 502.18h22.902" marker-end="url(#Arrow2Mend)"/>
+    <path d="m803.36 244.14h12.415v-84.544h8.5729" marker-end="url(#Arrow2Mend)"/>
+    <path d="m815.87 196.71h8.9781" marker-end="url(#Arrow2Mend)"/>
+   </g>
+  </g>
+  <path d="m896.91 164.84z" stroke-width=".74818px"/>
+  <g>
+   <g stroke-width=".869">
+    <path d="m893.1 157.6h17.03v36.661h-16.971"/>
+    <path d="m910.17 177.93h32.391" marker-end="url(#Arrow2Mend)"/>
+    <path d="m891.67 441.32h16.46v-23.34"/>
+    <path d="m804.09 431.11h18.189" marker-end="url(#Arrow2Mend)"/>
+   </g>
+   <path d="m447.69 235.03 6.4834-0.0143" marker-end="url(#Arrow2Mend)" stroke-width=".86975"/>
+   <path d="m447.71 273.4 6.2857-0.0143" marker-end="url(#Arrow2Mend)" stroke-width=".87"/>
+   <path d="m447.71 235v38.637" stroke-width=".86975"/>
+   <path d="m488.84 290.05v23.826h46.667" marker-end="url(#Arrow2Mend)" stroke-width=".87069"/>
+   <path d="m70.959 390.43h36.962" stroke-width=".869"/>
+  </g>
+ </g>
+ <path d="m23.043 373.5h66.474v33.237h-66.474v-33.237z" fill="#729fcf"/>
+ <path d="m456.98 346.07h66.474v33.237h-66.474v-33.237z" fill="#d3d7cf"/>
+ <path d="m620.09 346.07h66.474v33.237h-66.474v-33.237z" fill="#d3d7cf"/>
+ <g fill="none" stroke="#000">
+  <g>
+   <path d="m522.92 362.97h93.643" marker-end="url(#Arrow2Mend)" stroke-width=".87256"/>
+   <path d="m685.29 362.96h48.553" marker-end="url(#Arrow2Mend)" stroke-width=".869"/>
+   <path d="m409 361.27v-22.166h361.66v3.8973" marker-end="url(#Arrow2Mend)" stroke-width=".869"/>
+   <path d="m274.97 423.33v-61.577h178.39" marker-end="url(#Arrow2Mend)" stroke-width=".89036"/>
+   <path d="m142.2 427.79 6.4834-0.0143" marker-end="url(#Arrow2Mend)" stroke-width=".86975"/>
+   <path d="m142.22 466.16 33.155-0.0143" marker-end="url(#Arrow2Mend)" stroke-width=".87"/>
+   <path d="m142.22 427.76v38.637" stroke-width=".86975"/>
+   <path d="m218.85 423.68 71.782-0.0143" marker-end="url(#Arrow2Mend)" stroke-width=".87"/>
+   <path d="m275.03 423.33v77.093h11.236" stroke-width=".89036"/>
+  </g>
+  <path d="m245.36 465.52h8.9286v-41.786" stroke-width="1px"/>
+  <path d="m218.57 434.09h8.9286v11.071" marker-end="url(#Arrow2Mend)" stroke-width="1px"/>
+ </g>
+ <g font-family="sans-serif" font-size="10.667px">
+  <switch style="line-height:1.25"><text x="186.13113" y="601.39368" style="line-height:1.25" xml:space="preserve" id="trsvg55-it" systemLanguage="it"><tspan x="186.13113" y="601.39368" font-size="10.667px" id="trsvg1-it">APPASSIMENTO</tspan></text><text x="186.13113" y="601.39368" style="line-height:1.25" xml:space="preserve" id="trsvg55"><tspan x="186.13113" y="601.39368" font-size="10.667px" id="trsvg1">WILTING</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="303.16803" y="601.38837" style="line-height:1.25" xml:space="preserve" id="trsvg56-it" systemLanguage="it"><tspan x="303.16803" y="601.38837" font-size="10.667px" id="trsvg2-it">PESTATURA</tspan></text><text x="303.16803" y="601.38837" style="line-height:1.25" xml:space="preserve" id="trsvg56"><tspan x="303.16803" y="601.38837" font-size="10.667px" id="trsvg2">BRUISING</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="380.68558" y="601.40436" style="line-height:1.25" xml:space="preserve" id="trsvg57-it" systemLanguage="it"><tspan x="380.68558" y="601.40436" font-size="10.667px" id="trsvg3-it">OSSIDAZIONE</tspan></text><text x="380.68558" y="601.40436" style="line-height:1.25" xml:space="preserve" id="trsvg57"><tspan x="380.68558" y="601.40436" font-size="10.667px" id="trsvg3">OXIDATION</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="466.50259" y="601.40436" style="line-height:1.25" xml:space="preserve" id="trsvg58-it" systemLanguage="it"><tspan x="466.50259" y="601.40436" font-size="10.667px" id="trsvg4-it">COTTURA</tspan></text><text x="466.50259" y="601.40436" style="line-height:1.25" xml:space="preserve" id="trsvg58"><tspan x="466.50259" y="601.40436" font-size="10.667px" id="trsvg4">FIXATION</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="541.62067" y="601.39368" style="line-height:1.25" xml:space="preserve" id="trsvg59-it" systemLanguage="it"><tspan x="541.62067" y="601.39368" font-size="10.667px" id="trsvg5-it">INGIALLIMENTO</tspan></text><text x="541.62067" y="601.39368" style="line-height:1.25" xml:space="preserve" id="trsvg59"><tspan x="541.62067" y="601.39368" font-size="10.667px" id="trsvg5">YELLOWING</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="648.42841" y="601.38837" style="line-height:1.25" xml:space="preserve" id="trsvg60-it" systemLanguage="it"><tspan x="648.42841" y="601.38837" id="trsvg6-it">MODELLAMENTO</tspan></text><text x="648.42841" y="601.38837" style="line-height:1.25" xml:space="preserve" id="trsvg60"><tspan x="648.42841" y="601.38837" id="trsvg6">SHAPING</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="752.0271" y="601.39374" style="line-height:1.25" xml:space="preserve" id="trsvg61-it" systemLanguage="it"><tspan x="752.0271" y="601.39374" id="trsvg7-it">ESSICCAZIONE</tspan></text><text x="752.0271" y="601.39374" style="line-height:1.25" xml:space="preserve" id="trsvg61"><tspan x="752.0271" y="601.39374" id="trsvg7">DRYING</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="857.74475" y="601.38837" style="line-height:1.25" xml:space="preserve" id="trsvg62-it" systemLanguage="it"><tspan x="857.74475" y="601.38837" id="trsvg8-it">STAGIONATURA</tspan></text><text x="857.74475" y="601.38837" style="line-height:1.25" xml:space="preserve" id="trsvg62"><tspan x="857.74475" y="601.38837" id="trsvg8">CURING</tspan></text></switch>
+ </g>
+ <path d="m107.92 390.43v52.253h34.336" fill="none" stroke="#000" stroke-width="1px"/>
+ <g font-family="sans-serif" font-size="10.667px">
+  <switch style="line-height:1.25"><text x="327.5799" y="419.34824" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg63-it" systemLanguage="it"><tspan x="327.5799" y="419.34824" text-align="center" id="trsvg9-it">Mescolatura</tspan><tspan x="327.5799" y="432.68161" text-align="center" id="trsvg10-it">in cestello</tspan></text><text x="327.5799" y="419.34824" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg63"><tspan x="327.5799" y="419.34824" text-align="center" id="trsvg9">Tossing in</tspan><tspan x="327.5799" y="432.68161" text-align="center" id="trsvg10"> basket</tspan></text></switch>
+  <g text-anchor="middle">
+   <switch style="line-height:1.25"><text x="408.90686" y="419.30835" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg64-it" systemLanguage="it"><tspan x="408.90686" y="419.30835" id="trsvg11-it">Ossidazione</tspan><tspan x="408.90686" y="432.64172" id="trsvg12-it">parziale</tspan></text><text x="408.90686" y="419.30835" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg64"><tspan x="408.90686" y="419.30835" id="trsvg11">Partial</tspan><tspan x="408.90686" y="432.64172" id="trsvg12">oxidation</tspan></text></switch>
+   <switch style="line-height:1.25"><text x="326.65039" y="477.13962" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg65-it" systemLanguage="it"><tspan x="326.65039" y="477.13962" id="trsvg13-it">Leggera</tspan><tspan x="326.65039" y="490.47299" id="trsvg14-it">frantumazione</tspan></text><text x="326.65039" y="477.13962" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg65"><tspan x="326.65039" y="477.13962" id="trsvg13">Light</tspan><tspan x="326.65039" y="490.47299" id="trsvg14">crushing</tspan></text></switch>
+   <switch style="line-height:1.25"><text x="408.90689" y="478.51569" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg66-it" systemLanguage="it"><tspan x="408.90689" y="478.51569" id="trsvg15-it">Ossidazione</tspan><tspan x="408.90689" y="491.84906" id="trsvg16-it">completa</tspan></text><text x="408.90689" y="478.51569" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg66"><tspan x="408.90689" y="478.51569" id="trsvg15">Full</tspan><tspan x="408.90689" y="491.84906" id="trsvg16">oxidation</tspan></text></switch>
+  </g>
+  <switch style="line-height:1.25"><text x="314.18546" y="522.42566" style="line-height:1.25" xml:space="preserve" id="trsvg67-it" systemLanguage="it"><tspan x="314.18546" y="522.42566" id="trsvg17-it">Taglia Strappa Arrotola Ossida</tspan></text><text x="314.18546" y="522.42566" style="line-height:1.25" xml:space="preserve" id="trsvg67"><tspan x="314.18546" y="522.42566" id="trsvg17">CTC with full oxidation</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="467.95999" y="238.75694" style="line-height:1.25" xml:space="preserve" id="trsvg68-it" systemLanguage="it"><tspan x="467.95999" y="238.75694" id="trsvg18-it">Vaporizzazione</tspan></text><text x="467.95999" y="238.75694" style="line-height:1.25" xml:space="preserve" id="trsvg68"><tspan x="467.95999" y="238.75694" id="trsvg18">Steaming</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="470.87201" y="275.73465" style="line-height:1.25" xml:space="preserve" id="trsvg69-it" systemLanguage="it"><tspan x="470.87201" y="275.73465" id="trsvg19-it">Cottura in padella</tspan></text><text x="470.87201" y="275.73465" style="line-height:1.25" xml:space="preserve" id="trsvg69"><tspan x="470.87201" y="275.73465" id="trsvg19">Panning</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="474.05075" y="365.42288" style="line-height:1.25" xml:space="preserve" id="trsvg70-it" systemLanguage="it"><tspan x="474.05075" y="365.42288" id="trsvg20-it">Cottura al forno</tspan></text><text x="474.05075" y="365.42288" style="line-height:1.25" xml:space="preserve" id="trsvg70"><tspan x="474.05075" y="365.42288" id="trsvg20">Baking</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="470.87207" y="406.16885" style="line-height:1.25" xml:space="preserve" id="trsvg71-it" systemLanguage="it"><tspan x="470.87207" y="406.16885" id="trsvg21-it">Cottura in padella</tspan></text><text x="470.87207" y="406.16885" style="line-height:1.25" xml:space="preserve" id="trsvg71"><tspan x="470.87207" y="406.16885" id="trsvg21">Panning</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="474.05075" y="443.30649" style="line-height:1.25" xml:space="preserve" id="trsvg72-it" systemLanguage="it"><tspan x="474.05075" y="443.30649" id="trsvg22-it">Cottura al forno</tspan></text><text x="474.05075" y="443.30649" style="line-height:1.25" xml:space="preserve" id="trsvg72"><tspan x="474.05075" y="443.30649" id="trsvg22">Baking</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="547.34381" y="316.61331" style="line-height:1.25" xml:space="preserve" id="trsvg73-it" systemLanguage="it"><tspan x="547.34381" y="316.61331" id="trsvg23-it">Soffocatura</tspan></text><text x="547.34381" y="316.61331" style="line-height:1.25" xml:space="preserve" id="trsvg73"><tspan x="547.34381" y="316.61331" id="trsvg23">Sweltering</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="636.60345" y="239.04163" style="line-height:1.25" xml:space="preserve" id="trsvg74-it" systemLanguage="it"><tspan x="636.60345" y="239.04163" id="trsvg24-it">Arrotolamento</tspan></text><text x="636.60345" y="239.04163" style="line-height:1.25" xml:space="preserve" id="trsvg74"><tspan x="636.60345" y="239.04163" id="trsvg24">Rolling</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="669.35956" y="275.61014" style="line-height:1.25" xml:space="preserve" id="trsvg75-it" systemLanguage="it"><tspan x="669.35956" y="275.61014" id="trsvg25-it">Formatura</tspan></text><text x="669.35956" y="275.61014" style="line-height:1.25" xml:space="preserve" id="trsvg75"><tspan x="669.35956" y="275.61014" id="trsvg25">Forming</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="636.60352" y="316.61331" style="line-height:1.25" xml:space="preserve" id="trsvg76-it" systemLanguage="it"><tspan x="636.60352" y="316.61331" id="trsvg26-it">Arrotolamento</tspan></text><text x="636.60352" y="316.61331" style="line-height:1.25" xml:space="preserve" id="trsvg76"><tspan x="636.60352" y="316.61331" id="trsvg26">Rolling</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="653.27557" y="358.7562" text-align="center" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg77-it" systemLanguage="it"><tspan x="653.27557" y="358.7562" id="trsvg27-it">Leggero</tspan><tspan x="653.27557" y="372.08957" id="trsvg28-it">arrotolamento</tspan></text><text x="653.27557" y="358.7562" text-align="center" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg77"><tspan x="653.27557" y="358.7562" id="trsvg27">Light</tspan><tspan x="653.27557" y="372.08957" id="trsvg28">Rolling</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="636.60345" y="406.45343" style="line-height:1.25" xml:space="preserve" id="trsvg78-it" systemLanguage="it"><tspan x="636.60345" y="406.45343" id="trsvg29-it">Arrotolamento</tspan></text><text x="636.60345" y="406.45343" style="line-height:1.25" xml:space="preserve" id="trsvg78"><tspan x="636.60345" y="406.45343" id="trsvg29">Rolling</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="662.59692" y="443.18195" style="line-height:1.25" xml:space="preserve" id="trsvg79-it" systemLanguage="it"><tspan x="662.59692" y="443.18195" id="trsvg30-it">Appallottolamento</tspan></text><text x="662.59692" y="443.18195" style="line-height:1.25" xml:space="preserve" id="trsvg79"><tspan x="662.59692" y="443.18195" id="trsvg30">Ball Rolling</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="636.60352" y="484.02505" style="line-height:1.25" xml:space="preserve" id="trsvg80-it" systemLanguage="it"><tspan x="636.60352" y="484.02505" id="trsvg31-it">Arrotolamento</tspan></text><text x="636.60352" y="484.02505" style="line-height:1.25" xml:space="preserve" id="trsvg80"><tspan x="636.60352" y="484.02505" id="trsvg31">Rolling</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="755.00031" y="504.16406" style="line-height:1.25" xml:space="preserve" id="trsvg81-it" systemLanguage="it"><tspan x="755.00031" y="504.16406" id="trsvg32-it">Essiccazione</tspan></text><text x="755.00031" y="504.16406" style="line-height:1.25" xml:space="preserve" id="trsvg81"><tspan x="755.00031" y="504.16406" id="trsvg32">Drying</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="755.00024" y="424.65778" style="line-height:1.25" xml:space="preserve" id="trsvg82-it" systemLanguage="it"><tspan x="755.00024" y="424.65778" id="trsvg33-it">Essiccazione</tspan></text><text x="755.00024" y="424.65778" style="line-height:1.25" xml:space="preserve" id="trsvg82"><tspan x="755.00024" y="424.65778" id="trsvg33">Drying</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="755.00024" y="366.39322" style="line-height:1.25" xml:space="preserve" id="trsvg83-it" systemLanguage="it"><tspan x="755.00024" y="366.39322" id="trsvg34-it">Essiccazione</tspan></text><text x="755.00024" y="366.39322" style="line-height:1.25" xml:space="preserve" id="trsvg83"><tspan x="755.00024" y="366.39322" id="trsvg34">Drying</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="755.00031" y="316.45322" style="line-height:1.25" xml:space="preserve" id="trsvg84-it" systemLanguage="it"><tspan x="755.00031" y="316.45322" id="trsvg35-it">Essiccazione</tspan></text><text x="755.00031" y="316.45322" style="line-height:1.25" xml:space="preserve" id="trsvg84"><tspan x="755.00031" y="316.45322" id="trsvg35">Drying</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="755.00024" y="257.24588" style="line-height:1.25" xml:space="preserve" id="trsvg85-it" systemLanguage="it"><tspan x="755.00024" y="257.24588" id="trsvg36-it">Essiccazione</tspan></text><text x="755.00024" y="257.24588" style="line-height:1.25" xml:space="preserve" id="trsvg85"><tspan x="755.00024" y="257.24588" id="trsvg36">Drying</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="859.49634" y="155.07439" text-align="center" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg86-it" systemLanguage="it"><tspan x="859.49634" y="155.07439" id="trsvg37-it">Stagionatura</tspan><tspan x="859.49634" y="168.40776" id="trsvg38-it">naturale</tspan></text><text x="859.49634" y="155.07439" text-align="center" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg86"><tspan x="859.49634" y="155.07439" id="trsvg37">Natural</tspan><tspan x="859.49634" y="168.40776" id="trsvg38">aging</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="859.93372" y="191.81209" text-align="center" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg87-it" systemLanguage="it"><tspan x="859.93372" y="191.81209" id="trsvg39-it">Accatastamento</tspan><tspan x="859.93372" y="205.14546" id="trsvg40-it">con umidità</tspan></text><text x="859.93372" y="191.81209" text-align="center" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg87"><tspan x="859.93372" y="191.81209" id="trsvg39">Wet</tspan><tspan x="859.93372" y="205.14546" id="trsvg40">piling</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="844.802" y="443.24478" style="line-height:1.25" xml:space="preserve" id="trsvg88-it" systemLanguage="it"><tspan x="844.802" y="443.24478" id="trsvg41-it">Tostatura</tspan></text><text x="844.802" y="443.24478" style="line-height:1.25" xml:space="preserve" id="trsvg88"><tspan x="844.802" y="443.24478" id="trsvg41">Firing</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="985.25397" y="174.43813" font-weight="bold" text-align="center" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg89-it" systemLanguage="it"><tspan x="985.25397" y="174.43813" text-align="center" id="trsvg42-it">Tè post</tspan><tspan x="985.25397" y="187.7715" text-align="center" id="trsvg43-it">fermentato</tspan></text><text x="985.25397" y="174.43813" font-weight="bold" text-align="center" text-anchor="middle" style="line-height:1.25" xml:space="preserve" id="trsvg89"><tspan x="985.25397" y="174.43813" text-align="center" id="trsvg42">Post-</tspan><tspan x="985.25397" y="187.7715" text-align="center" id="trsvg43">fermented tea</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="961.38721" y="258.06989" style="line-height:1.25" xml:space="preserve" id="trsvg90-it" systemLanguage="it"><tspan x="961.38721" y="258.06989" font-family="sans-serif" font-weight="bold" id="trsvg44-it">Tè verde</tspan></text><text x="961.38721" y="258.06989" style="line-height:1.25" xml:space="preserve" id="trsvg90"><tspan x="961.38721" y="258.06989" font-family="sans-serif" font-weight="bold" id="trsvg44">Green tea</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="959.58984" y="317.46936" style="line-height:1.25" xml:space="preserve" id="trsvg91-it" systemLanguage="it"><tspan x="959.58984" y="317.46936" font-family="sans-serif" font-weight="bold" id="trsvg45-it">Tè giallo</tspan></text><text x="959.58984" y="317.46936" style="line-height:1.25" xml:space="preserve" id="trsvg91"><tspan x="959.58984" y="317.46936" font-family="sans-serif" font-weight="bold" id="trsvg45">Yellow tea</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="985.3446" y="368.09821" style="line-height:1.25" xml:space="preserve" id="trsvg92-it" systemLanguage="it"><tspan x="985.3446" y="368.09821" font-family="sans-serif" font-weight="bold" text-align="center" text-anchor="middle" id="trsvg46-it">Tè bianco</tspan></text><text x="985.3446" y="368.09821" style="line-height:1.25" xml:space="preserve" id="trsvg92"><tspan x="985.3446" y="368.09821" font-family="sans-serif" font-weight="bold" text-align="center" text-anchor="middle" id="trsvg46">White tea</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="958.09656" y="425.18939" font-weight="bold" style="line-height:1.25" xml:space="preserve" id="trsvg93-it" systemLanguage="it"><tspan x="958.09656" y="425.18939" id="trsvg47-it">Tè oolong</tspan></text><text x="958.09656" y="425.18939" font-weight="bold" style="line-height:1.25" xml:space="preserve" id="trsvg93"><tspan x="958.09656" y="425.18939" id="trsvg47">Oolong tea</tspan></text></switch>
+  <switch style="line-height:1.25"><text x="962.7312" y="505.85553" style="line-height:1.25" xml:space="preserve" id="trsvg94-it" systemLanguage="it"><tspan x="962.7312" y="505.85553" font-family="sans-serif" font-weight="bold" id="trsvg48-it">Tè nero</tspan></text><text x="962.7312" y="505.85553" style="line-height:1.25" xml:space="preserve" id="trsvg94"><tspan x="962.7312" y="505.85553" font-family="sans-serif" font-weight="bold" id="trsvg48">Black tea</tspan></text></switch>
+  <g text-anchor="middle">
+   <switch style="line-height:1.25"><text x="185.97112" y="424.02481" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg95-it" systemLanguage="it"><tspan x="185.97112" y="424.02481" id="trsvg49-it">Appassimento</tspan><tspan x="185.97112" y="437.35818" id="trsvg50-it">al sole</tspan></text><text x="185.97112" y="424.02481" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg95"><tspan x="185.97112" y="424.02481" id="trsvg49">Sunned</tspan><tspan x="185.97112" y="437.35818" id="trsvg50">wilting</tspan></text></switch>
+   <switch style="line-height:1.25"><text x="212.63109" y="461.9462" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg96-it" systemLanguage="it"><tspan x="212.63109" y="461.9462" id="trsvg51-it">Appassimento</tspan><tspan x="212.63109" y="475.27957" id="trsvg52-it">al chiuso</tspan></text><text x="212.63109" y="461.9462" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg96"><tspan x="212.63109" y="461.9462" id="trsvg51">Indoor</tspan><tspan x="212.63109" y="475.27957" id="trsvg52">wilting</tspan></text></switch>
+   <switch style="line-height:1.25"><text x="56.189205" y="387.3367" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg97-it" systemLanguage="it"><tspan x="56.189205" y="387.3367" id="trsvg53-it">Foglie di tè</tspan><tspan x="56.189205" y="400.67007" id="trsvg54-it">fresche</tspan></text><text x="56.189205" y="387.3367" text-align="center" style="line-height:1.25" xml:space="preserve" id="trsvg97"><tspan x="56.189205" y="387.3367" id="trsvg53">Fresh tea</tspan><tspan x="56.189205" y="400.67007" id="trsvg54">leaves</tspan></text></switch>
+  </g>
+ </g>
+</svg>
