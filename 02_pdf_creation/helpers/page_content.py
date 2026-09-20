@@ -256,7 +256,7 @@ class ContentPageRenderer:
         text-transform: uppercase;
         letter-spacing: 0.12em;
         color: #59615f;
-        border-bottom: 1pt solid #47664a;
+        border-bottom: 0.5pt solid rgba(71, 102, 74, 0.4);
         opacity: 0.8;
         text-align: left;
     }

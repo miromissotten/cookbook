@@ -42,8 +42,9 @@ def display_parts(name: str) -> Tuple[str, str]:
 # ("x.x.x." and beyond) are omitted from the table of contents.
 TOC_MAX_DEPTH = 2
 
-# Max depth for the full TOC pages inserted before the outro: effectively
-# unlimited so every page in the book appears somewhere in the back matter.
+# Max depth for the full TOC page rendered for the `_Annex.A.` back-matter
+# page: effectively unlimited so every page in the book appears somewhere
+# in the back matter.
 FULL_TOC_MAX_DEPTH = 99
 
 
@@ -148,7 +149,8 @@ class TOCPageRenderer:
 
         Like ``render`` but shows every entry regardless of numbering depth,
         using the chapter sub-TOC hierarchy style so deep nesting stays
-        legible. Used for the back-matter full TOC inserted before the outro.
+        legible. Used for the back-matter full TOC rendered for the
+        `_Annex.A.` page.
         """
         html_parts = ['<div class="toc-hierarchy content-text">']
         for section in sections:

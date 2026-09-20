@@ -1423,13 +1423,14 @@ class CookbookGenerator:
                 chapter = display_parts(
                     chapter_subtrees[filename].get("name", ""))[1]
             is_notdone = self._is_notdone_file(filename)
-            if chapter and chapter.lower() == 'outro':
+            if filename == '_Annex.A. Full Table Of Contents.md':
                 full_toc_html = TOCPageRenderer().render_full_toc(
                     TOC_PAGE_TITLE, hierarchy,
                     link_resolver=lambda ref: self._resolve_wiki_page(ref)[0],
                 )
                 full_toc_file = self._write_temp_html('temp_full_toc', full_toc_html)
                 pdf_jobs.append((str(full_toc_file), TOC_PAGE_TITLE, '', False))
+                continue
             if filename in recipe_htmls:
                 pdf_jobs.append((recipe_htmls[filename], chapter, subsection, is_notdone))
             elif filename in non_recipe_lookup:

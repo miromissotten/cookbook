@@ -248,7 +248,7 @@ class ContentTableLayoutRegressions(unittest.TestCase):
         }""")
 
     def test_ramen_toppings_table_wraps_within_the_sheet(self):
-        page = self.render_content("_5.2.2. list_Ramen Toppings.md")
+        page = self.render_content("_5.2.2. Categorisation_Toppings.md")
         shape = self.measure_tables(page)
         self.assertGreaterEqual(shape["sheets"], 1)
         self.assertTrue(shape["tables"], "toppings table missing")
