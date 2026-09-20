@@ -131,6 +131,25 @@ class TestStructureFiles(unittest.TestCase):
             self.assertIn("##### [[_1.1.1.1. Deep_Item]]", content)
             self.assertIn("###### [[_1.1.1.1.1. Deeper_Item]]", content)
 
+    def test_annex_files_appear_at_end_of_structure(self):
+        """_Annex.X. files should be included at the end as ## headings."""
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            _write(tmp_path, "_1. Chapter.md")
+            _write(tmp_path, "_Annex.A. Full Table Of Contents.md")
+            _write(tmp_path, "_Annex.B. Outro.md")
+            content = StructureGenerator(directory=str(tmp_path)).generate_structure_file()
+            lines = content.strip().split("\n")
+            self.assertEqual(lines[0], "# Book Name: Modular Flavour")
+            self.assertIn("## [[_1. Chapter]]", content)
+            self.assertIn("## [[_Annex.A. Full Table Of Contents]]", content)
+            self.assertIn("## [[_Annex.B. Outro]]", content)
+            annex_a_pos = content.index("## [[_Annex.A. Full Table Of Contents]]")
+            annex_b_pos = content.index("## [[_Annex.B. Outro]]")
+            chapter_pos = content.index("## [[_1. Chapter]]")
+            self.assertLess(chapter_pos, annex_a_pos)
+            self.assertLess(annex_a_pos, annex_b_pos)
+
 
 if __name__ == "__main__":
     unittest.main()

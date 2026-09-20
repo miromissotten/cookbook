@@ -174,6 +174,25 @@ class StructureGenerator:
             key=lambda e: (self._sort_key(e["numeric_parts"]), e["filename"])
         )
 
+        # Second pass: include _Annex.X. files at the end of the book.
+        # parse_prefix does not recognise the _Annex.X. prefix, so they are
+        # skipped by the main loop above; we append them here with a sort
+        # key that places them after every numbered chapter.
+        annex_pattern = re.compile(r"^_Annex\.([A-Za-z]+)\.?\s*(.+)$")
+        for filename in all_files:
+            if self.is_excluded(filename):
+                continue
+            stem = Path(filename).stem
+            if annex_pattern.match(stem):
+                entries.append({
+                    "numeric_parts": (float('inf'),),
+                    "filename": filename,
+                })
+
+        entries.sort(
+            key=lambda e: (self._sort_key(e["numeric_parts"]), e["filename"])
+        )
+
         output_lines = ["# Book Name: Modular Flavour"]
 
         for entry in entries:
