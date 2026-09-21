@@ -6,13 +6,9 @@ ordered filenames + hierarchy) with tmp_path-free fixtures
 
 Run: python -m unittest discover -s tests -v
 """
-import sys
 import tempfile
 import unittest
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "02_pdf_creation"))
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "02_pdf_creation" / "helpers"))
 
 from main_generate_cookbook_structure import StructureGenerator
 from structure_parser import StructureParser

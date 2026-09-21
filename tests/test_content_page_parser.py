@@ -8,16 +8,9 @@ content, so the pipeline stays backward compatible.
 
 Run: python -m unittest discover -s tests -v
 """
-import sys
 import tempfile
 import unittest
 from pathlib import Path
-
-PDF_ROOT = Path(__file__).resolve().parents[1] / "02_pdf_creation"
-HELPERS_DIR = PDF_ROOT / "helpers"
-for _dir in (str(PDF_ROOT), str(HELPERS_DIR)):
-    if _dir not in sys.path:
-        sys.path.insert(0, _dir)
 
 from main_generate_cookbook import CookbookGenerator
 from page_renderer import RecipeParser

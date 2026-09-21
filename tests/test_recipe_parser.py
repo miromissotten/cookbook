@@ -3,13 +3,15 @@
 Pins the absorb-all contract from ADR 0001/0012 using small inline
 markdown fixtures (no data_modularflavour/text dependency, no browser needed).
 
+Note: several tests assert on HTML structure (tag counts, class names).
+These are implementation-sensitive but guard specific layout regressions:
+the Aglio e Olio double-stream bug and the instruction-intro marker bug.
+Removing them would allow those regressions to pass silently.
+
 Stdlib unittest style: python -m unittest discover -s tests -v
 """
-import sys
 import unittest
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "02_pdf_creation" / "helpers"))
 
 from page_renderer import RecipeParser
 

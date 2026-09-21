@@ -9,7 +9,6 @@ import re
 import shutil
 import sys
 import tempfile
-import time
 import uuid
 from collections import defaultdict
 from datetime import datetime
@@ -72,20 +71,39 @@ from config import (
 )
 from input_roots import PathSpec, find_file, resolve_roots
 from helpers.console_logging import progress, info, warn, error, fatal
-
-# [[Page]] or [[Page|shown text]] - Obsidian wiki links in source content.
-# The negative lookbehind keeps ![[embed]] out of the page-link pass.
-_WIKI_LINK_RE = re.compile(r'(?<!!)\[\[([^\]|]+(?:\|[^\]]+)?)\]\]')
-
-# Display title of the main table of contents: single source of truth for
-# the TOC sheet's rendered title, its footer label and (via clean_title_id)
-# the anchor id whose measured page the digital variant's "back to table
-# of contents" footer link targets (ADR 0004).
-TOC_PAGE_TITLE = "Table of Contents"
-cookbook_folder = "data_modularflavour"
-
+from cookbook_constants import (
+    _WIKI_LINK_RE,
+    TOC_PAGE_TITLE,
+    cookbook_folder,
+    SCATTERPLOT_KIND as _CONST_SCATTERPLOT_KIND,
+    RADAR_KIND as _CONST_RADAR_KIND,
+    SCATTERPLOT_IMG_STYLE as _CONST_SCATTERPLOT_IMG_STYLE,
+    RADAR_IMG_STYLE as _CONST_RADAR_IMG_STYLE,
+    RADAR_IMG_ALT as _CONST_RADAR_IMG_ALT,
+    _LOVE_HEART_SIZE_MM as _CONST_LOVE_HEART_SIZE_MM,
+    _LOVE_HEART_OPTICAL_OFFSET_PT as _CONST_LOVE_HEART_OPTICAL_OFFSET_PT,
+    _WATERMARK_CSS as _CONST_WATERMARK_CSS,
+)
+from page_id_helpers import page_id_for_title
+from watermark_helpers import inject_notdone_watermark
+from file_uri_helpers import build_file_uri
+from temp_dir_helpers import (
+    ensure_temp_dir,
+    sweep_stale_temp_dirs,
+    clear_temp_dir_contents,
+    write_temp_html,
+)
+from build_lock_helpers import acquire_build_lock as _acquire_build_lock, release_build_lock as _release_build_lock
 
 class CookbookGenerator:
+    SCATTERPLOT_KIND = _CONST_SCATTERPLOT_KIND
+    RADAR_KIND = _CONST_RADAR_KIND
+    SCATTERPLOT_IMG_STYLE = _CONST_SCATTERPLOT_IMG_STYLE
+    RADAR_IMG_STYLE = _CONST_RADAR_IMG_STYLE
+    RADAR_IMG_ALT = _CONST_RADAR_IMG_ALT
+    _LOVE_HEART_SIZE_MM = _CONST_LOVE_HEART_SIZE_MM
+    _LOVE_HEART_OPTICAL_OFFSET_PT = _CONST_LOVE_HEART_OPTICAL_OFFSET_PT
+    _WATERMARK_CSS = _CONST_WATERMARK_CSS
     """Generate a PDF cookbook from markdown files based on structure."""
     
     def __init__(self, input_dir: Optional[PathSpec] = None, temp_dir: Optional[str] = None):
@@ -224,11 +242,6 @@ class CookbookGenerator:
         with open(pdf_path, "wb") as f:
             writer.write(f)
             
-    _LOVE_HEART_SIZE_MM = 6
-    # Optical middle of the page-number digits: about half their cap
-    # height above the baseline (Helvetica-Bold cap height ~ 0.718 em => ~3 pt).
-    _LOVE_HEART_OPTICAL_OFFSET_PT = 3
-
     @staticmethod
     def _love_heart_path() -> Optional[str]:
         """Locate icon_love.png regardless of the working directory."""
@@ -321,41 +334,7 @@ class CookbookGenerator:
         The first location where the file actually exists wins; the returned URI
         uses proper percent-encoding (e.g. spaces become ``%20``).
         """
-        # Sanitize the referenced filename: strip path separators so we never
-        # escape the search roots (Obsidian stores embeds as bare filenames).
-        filename = os.path.basename(filename)
-        # Ignore Obsidian heading references like "image#section".
-        if '#' in filename:
-            filename = filename.split('#')[0].strip()
-
-        search_roots = [
-            str(self.input_dir),
-            # Secondary input roots (e.g. text_notdone) also host page assets.
-            *[str(root) for root in self.input_roots[1:]],
-            # Script-relative (cwd-independent) first, cwd-relative second.
-            str(_SCRIPT_DIR.parent / "data_modularflavour" / "images"),
-            str(Path("data_modularflavour") / "images"),
-            str(_SCRIPT_DIR.parent / "data_modularflavour" / "icon"),
-            str(Path("data_modularflavour") / "icon"),
-            ".",
-        ]
-        for root in search_roots:
-            candidate = Path(root) / filename
-            try:
-                if candidate.is_file():
-                    return candidate.resolve().as_uri()
-            except OSError:
-                continue
-
-        # Fallback: keep the previous absolute-path behavior so nothing breaks
-        # if the file is simply not found (broken image icon is shown instead).
-        base_path = str(self.input_dir)
-        abs_path = os.path.abspath(base_path).replace(os.sep, '/')
-
-        # Windows paths have a drive letter (e.g., G:/path), Unix paths don't
-        if ':' in abs_path:
-            return f'file:///{abs_path}/{filename}'
-        return f'file://{abs_path}/{filename}'
+        return build_file_uri(filename, self.input_dir, self.input_roots, _SCRIPT_DIR)
      
     def _convert_wiki_embed_to_img(self, match: re.Match) -> str:
         r"""Convert Obsidian wiki-style embed syntax to HTML img tag.
@@ -380,17 +359,6 @@ class CookbookGenerator:
         # instead of reflowing.
         return (f'<img src="{file_uri}" alt="{filename}" '
                 f'style="max-width:100%;height:auto" />')
-
-    # Marker kinds of the ==GRAPH_<KIND>_START/END== convention: each block
-    # holds a markdown pipe-table that its renderer turns into a PNG.
-    SCATTERPLOT_KIND = 'SCATTERPLOT'
-    RADAR_KIND = 'RADARGRAPH'
-    # A scatterplot fills the column it sits in; a radar chart is a small
-    # square pinned under the flavour metadata it describes. Its width comes
-    # from graph_radar, which draws the chart at exactly that printed size.
-    SCATTERPLOT_IMG_STYLE = 'max-width:100%;height:auto'
-    RADAR_IMG_STYLE = f'width:{PRINT_WIDTH_MM}mm;height:auto'
-    RADAR_IMG_ALT = 'Radar chart of the flavour profile'
 
     def _graph_block_to_img(self, table_text: str, kind: str, renderer,
                             alt: str, style: str,
@@ -509,6 +477,8 @@ class CookbookGenerator:
         else:
             page_ref = content.strip()
             display_text = None
+
+        page_ref = page_ref.rstrip('\\]')
 
         page_id, actual_title = self._resolve_wiki_page(page_ref)
 
@@ -849,10 +819,7 @@ class CookbookGenerator:
         Content pages (page_content.py) additionally strip non-[a-z0-9-] chars.
         Keeping these in sync ensures wiki-link anchors match real page IDs.
         """
-        clean_id = str(title).replace(' ', '-').replace('_', '-').lower()
-        if not is_recipe:
-            clean_id = re.sub(r'[^a-z0-9\-]', '', clean_id)
-        return 'page-' + clean_id
+        return page_id_for_title(title, is_recipe=is_recipe)
 
     def _register_page_identity(self, title: str, filename_stem: str,
                                 is_recipe: bool) -> str:
@@ -923,8 +890,7 @@ class CookbookGenerator:
 
     def _ensure_temp_dir(self):
         """Create the temp working folder if an external tool removed it."""
-        if not self.temp_dir.exists():
-            self.temp_dir.mkdir(parents=True, exist_ok=True)
+        ensure_temp_dir(self.temp_dir)
 
     def _sweep_stale_temp_dirs(self):
         """Delete leftover per-run working folders older than 24 hours.
@@ -932,16 +898,7 @@ class CookbookGenerator:
         Per-run folders accumulate when a build crashes hard; without this
         sweep the system temp dir slowly fills with orphaned sheets.
         """
-        base = Path(tempfile.gettempdir())
-        for d in base.glob("cookbook_build_*"):
-            if d == self.temp_dir:
-                continue
-            try:
-                age_h = (time.time() - d.stat().st_mtime) / 3600
-                if age_h > 24:
-                    shutil.rmtree(d, ignore_errors=True)
-            except OSError:
-                continue
+        sweep_stale_temp_dirs(self.temp_dir)
 
     def acquire_build_lock(self) -> bool:
         """Claim exclusive rights to run a build; False when one is running.
@@ -950,43 +907,14 @@ class CookbookGenerator:
         survives across different shells. Locks older than two hours are
         treated as stale leftovers from a crashed build and replaced.
         """
-        lock_path = self.exports_dir / ".build.lock"
-        try:
-            if lock_path.exists():
-                age_h = (time.time() - lock_path.stat().st_mtime) / 3600
-                if age_h < 2:
-                    print(
-                        "ERROR: another cookbook build appears to be running "
-                        f"(lock: {lock_path}, {age_h * 60:.0f} min old). "
-                        "Wait for it to finish; if you are certain none is "
-                        "running, delete the lock file and retry."
-                    )
-                    return False
-                warn(f"removing stale build lock ({age_h:.1f} h old) from a crashed run")
-                lock_path.unlink()
-            fd = os.open(str(lock_path), os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-            os.write(fd, str(os.getpid()).encode())
-            os.close(fd)
-            self._build_lock_path = lock_path
-            return True
-        except FileExistsError:
-            print(f"ERROR: another cookbook build appears to be running "
-                  f"(lock: {lock_path}). If you are certain none is running, "
-                  "delete the lock file and retry.")
-            return False
-        except OSError as exc:
-            # Never brick builds over lock hygiene problems.
-            warn(f"could not create build lock ({exc}); continuing without one")
-            self._build_lock_path = None
-            return True
+        success, lock_path = _acquire_build_lock(self.exports_dir)
+        self._build_lock_path = lock_path
+        return success
 
     def release_build_lock(self):
         """Drop the build lock if we still own it."""
         if self._build_lock_path is not None:
-            try:
-                self._build_lock_path.unlink()
-            except OSError:
-                pass
+            _release_build_lock(self._build_lock_path)
             self._build_lock_path = None
 
     def _clear_temp_dir_contents(self):
@@ -997,14 +925,7 @@ class CookbookGenerator:
         async reconciliation, which can delete its freshly recreated
         replacement mid-build (breaking every page write).
         """
-        for entry in self.temp_dir.iterdir():
-            try:
-                if entry.is_dir():
-                    shutil.rmtree(entry, ignore_errors=True)
-                else:
-                    entry.unlink()
-            except OSError as exc:
-                warn(f"could not clear temp entry {entry}: {exc}")
+        clear_temp_dir_contents(self.temp_dir, warn=warn)
 
     def _write_temp_html(self, filename_stem: str, html_content: str) -> str:
         """Write an intermediate HTML file, healing the temp dir once if an
@@ -1012,23 +933,7 @@ class CookbookGenerator:
         transient OS/cloud-sync errors (permission lock, sharing violation) so
         a busy vault can never silently zero out a build.
         """
-        html_path = self.temp_dir / f"{filename_stem}.html"
-        last_exc: Optional[Exception] = None
-        for attempt in range(2):
-            try:
-                self.temp_dir.mkdir(parents=True, exist_ok=True)
-                with open(html_path, 'w', encoding='utf-8') as f:
-                    f.write(html_content)
-                return str(html_path)
-            except OSError as exc:
-                # First failure: heal + retry once; second failure: report it so
-                # the caller prints a visible per-file error instead of silently
-                # dropping the page (others propagate to the caller check).
-                last_exc = exc
-                if attempt == 0:
-                    continue
-                raise
-        raise last_exc  # pragma: no cover - loop always returns or raises above
+        return write_temp_html(self.temp_dir, filename_stem, html_content)
 
     def write_generation_report(self):
         """Print the parse-quality summary and write exports/generation_report.md.
@@ -1045,7 +950,13 @@ class CookbookGenerator:
 
         report_text = '\n'.join(report_lines)
 
-        print("\n" + report_text + "\n")
+        console_lines = [
+            line for line in report_lines
+            if line.startswith("Summary:")
+            or line.startswith("Layout:")
+            or line.startswith("Links [")
+        ]
+        print("\n" + "\n".join(console_lines) + "\n")
         report_path = self.exports_dir / "generation_report.md"
         try:
             md_text = render_report_markdown(
@@ -1715,37 +1626,9 @@ class CookbookGenerator:
             size_mb = historic_digital_path.stat().st_size / 1024 / 1024
             print(f"  [historic] {historic_digital_path} ({size_mb:.2f} MB)")
 
-    _WATERMARK_CSS = """\
-.notdone-watermark::after {
-    content: "miró not happy yet";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-45deg);
-    color: rgba(220, 38, 38, 0.18);
-    font-family: 'Manrope', 'Work Sans', 'Plus Jakarta Sans', Arial, sans-serif;
-    font-size: 7rem;
-    font-weight: 700;
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 50;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-}"""
-
     def _inject_notdone_watermark(self, html_path: str) -> None:
         """Add the ``notdone-watermark`` class and CSS to a sheet HTML file."""
-        path = Path(html_path)
-        if not path.exists():
-            return
-        with open(path, 'r', encoding='utf-8') as f:
-            html = f.read()
-        if 'notdone-watermark' in html:
-            return
-        html = html.replace('<div class="recipe-page"', '<div class="recipe-page notdone-watermark"')
-        html = html.replace('</style>', self._WATERMARK_CSS + '\n</style>', 1)
-        with open(path, 'w', encoding='utf-8') as f:
-            f.write(html)
+        return inject_notdone_watermark(html_path, self._WATERMARK_CSS)
 
     def generate(self, structure_file: str = None, output_file: str = None):
         """

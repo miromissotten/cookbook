@@ -6,16 +6,9 @@ All fixtures live in temp dirs; no real data folder is touched.
 
 Run: python -m unittest discover -s tests -v
 """
-import sys
 import tempfile
 import unittest
 from pathlib import Path
-
-PDF_ROOT = Path(__file__).resolve().parents[1] / "02_pdf_creation"
-HELPERS_DIR = PDF_ROOT / "helpers"
-for _dir in (str(PDF_ROOT), str(HELPERS_DIR)):
-    if _dir not in sys.path:
-        sys.path.insert(0, _dir)
 
 from input_roots import find_file, iter_markdown_files, resolve_roots
 from main_generate_cookbook import CookbookGenerator
@@ -78,6 +71,11 @@ class TestFindAndIterate(unittest.TestCase):
         _write(self.root_b, "_2. B.md")
         _write(self.root_b, "_1. A.md")  # shadowed by root_a's copy
         files = iter_markdown_files([self.root_a, self.root_b])
+        self.assertEqual(files.count("_1. A.md"), 1)
+        self.assertIn("_1. A.md", files)
+        self.assertIn("_2. B.md", files)
+        self.assertEqual(files[0], "_1. A.md")
+        self.assertEqual(files[1], "_2. B.md")
 
 
 class TestStructureParserMultiRoot(unittest.TestCase):

@@ -5,17 +5,15 @@ is driven by two counters that must agree on every sheet shape the templates
 and the watermark pass can emit. These tests pin that contract directly so a
 future "exact string" regression can't silently re-introduce the false warning.
 
+Note: these tests verify regex-based HTML counters, which are implementation
+details. They are retained because the footer-token/sheet-count contract is
+user-visible (it controls a diagnostic warning) and would be expensive to
+test via full PDF rendering.
+
 Run: python -m unittest tests.test_sheet_counting -v
 """
-import sys
 import unittest
 from pathlib import Path
-
-_PDF_ROOT = Path(__file__).resolve().parents[1] / "02_pdf_creation"
-_HELPERS_DIR = _PDF_ROOT / "helpers"
-for _dir in (str(_PDF_ROOT), str(_HELPERS_DIR)):
-    if _dir not in sys.path:
-        sys.path.insert(0, _dir)
 
 from html_to_pdf import count_footer_tokens  # noqa: E402
 from page_splitter import count_sheets  # noqa: E402

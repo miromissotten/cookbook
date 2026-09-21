@@ -7,11 +7,8 @@ text-only) so refactors cannot silently change them.
 Stdlib unittest style so the suite runs without extra dependencies:
 python -m unittest discover -s tests -v
 """
-import sys
 import unittest
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "02_pdf_creation" / "helpers"))
 
 from page_toc import (
     CHAPTER_TOC_MAX_DEPTH,

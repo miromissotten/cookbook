@@ -7,13 +7,9 @@ directly, reloads once on failure and refuses to print on a second
 failure. Also pins the vendored-font wiring of the sheet templates.
 """
 
-import sys
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-
-sys.path.insert(
-    0, str(Path(__file__).resolve().parents[1] / "02_pdf_creation" / "helpers"))
 
 from html_to_pdf import ensure_print_fonts
 
@@ -117,7 +113,15 @@ class EnsurePrintFontsTests(unittest.TestCase):
 
 
 class TemplateFontWiringTests(unittest.TestCase):
-    """The sheet templates must use the vendored fonts, never the CDN."""
+    """Guards the vendored-font regression (CDN fallback).
+
+    These tests inspect production source files for specific strings.
+    They are intentionally implementation-sensitive: the alternative
+    (rendering a full PDF and inspecting font URLs) would require a
+    browser and be orders of magnitude slower. The cost of brittleness
+    is low because the vendored-font wiring is stable infrastructure,
+    not frequently-changed logic.
+    """
 
     def _sources(self):
         return [

@@ -1,14 +1,10 @@
 """Browser regressions for content-height sidebars and atomic variant moves."""
 
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-TOOL = ROOT / "02_pdf_creation"
-for directory in (TOOL, TOOL / "helpers", TOOL / "debug"):
-    sys.path.insert(0, str(directory))
 
 from debug_split_recipe import copy_libs
 from main_generate_cookbook import CookbookGenerator
@@ -115,7 +111,21 @@ class RecipeLayoutRegressions(unittest.TestCase):
     def test_recipe_without_ingredients_prints_vertical_fullwidth(self):
         """No `### Ingredients` section -> no Ingredients section printed and
         the vertical layout elected (never the side-by-side split)."""
-        page = self.render("_3.1.1. Ramen_Bouillon.md")
+        content = (
+            "### Title\n- title: Ramen Bouillon\n\n"
+            "### Side info\n- group: component\n\n"
+            "### Instructions\n1. Simmer the bones.\n")
+        _, path = self.generator.process_recipe_to_html(
+            "_3.1.1. Ramen_Bouillon.md", content)
+        self.assertTrue(path)
+        diagnostics = split_page_file(path) or []
+        self.assertFalse([d for d in diagnostics if d[0] in ("warn", "error")],
+                         diagnostics)
+        page = _get_browser().new_page(viewport={"width": 794, "height": 1123})
+        self.addCleanup(page.close)
+        page.emulate_media(media="print")
+        page.goto(Path(path).resolve().as_uri(), wait_until="networkidle")
+        wait_for_render_settled(page)
         self.assertEqual(page.locator('.recipe-page').count(), 1)
         shape = page.evaluate("""() => {
             const article = document.querySelector(
@@ -145,7 +155,7 @@ class RecipeLayoutRegressions(unittest.TestCase):
         self.assertIn(("vertical",
                        "_3.1.1. Ramen_Bouillon.html: "
                        "vertical layout elected (1 sheet)"),
-                      self.last_diagnostics)
+                      diagnostics)
 
     def test_oversized_recipe_without_ingredients_rebuilds_vertical_bands(self):
         """A long no-ingredients recipe overflows into the vertical band

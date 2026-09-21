@@ -7,16 +7,11 @@ under the recipe's sauce profile chips; a page without a block prints no chart.
 
 Run: python -m unittest discover -s tests -v
 """
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 PDF_ROOT = Path(__file__).resolve().parents[1] / "02_pdf_creation"
-HELPERS_DIR = PDF_ROOT / "helpers"
-for _dir in (str(PDF_ROOT), str(HELPERS_DIR)):
-    if _dir not in sys.path:
-        sys.path.insert(0, _dir)
 
 from graph_radar import render_radar_png
 from main_generate_cookbook import CookbookGenerator
@@ -70,6 +65,10 @@ class RadarTableRendering(unittest.TestCase):
         self.assertTrue(self.png_path.is_file())
         self.assertGreater(self.png_path.stat().st_size, 0)
         self.assertTrue(uri.startswith("file:///"), uri)
+        # Verify it's actually a valid PNG
+        with open(self.png_path, "rb") as f:
+            header = f.read(8)
+        self.assertEqual(header, b"\x89PNG\r\n\x1a\n")
 
     def test_accepts_the_generators_headers_kwarg(self):
         # _graph_block_to_img passes headers= to every graph renderer; the

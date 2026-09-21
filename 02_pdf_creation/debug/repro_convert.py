@@ -1,5 +1,4 @@
 """Convert the repro chapter page to PDF and inspect what actually prints."""
-import os
 import sys
 from pathlib import Path
 
