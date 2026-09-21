@@ -32,6 +32,7 @@ seam audit (``audit_page_seams``) re-checks this on any loaded page;
 html_to_pdf runs it as a conversion gate before page.pdf().
 """
 
+import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 
@@ -44,6 +45,72 @@ from html_to_pdf import (
 
 # The measurement epsilon and the scale floor are consumed by the in-browser
 # pass below (``EPS`` / ``MIN_SCALE``), not by Python.
+
+_FOOTER_TOKEN_RE = re.compile(
+    r'<div\s+data-page-footer(?:\s*=\s*"[^"]*")?\s*/?>'
+)
+# A sheet div's class list may carry extra classes on top of ``recipe-page``
+# (e.g. the TODO watermark's ``notdone-watermark``), so match the class as a
+# substring instead of the exact attribute value.
+_SHEET_RE = re.compile(r'<div[^>]*class="[^"]*\brecipe-page\b[^"]*"[^>]*>')
+# Legacy template shape the combiner still recognises
+# (html_to_pdf.A4PageExtractor.PAGE_PATTERNS); current templates do not emit
+# it, but the sheet diagnostics count both so they stay honest.
+_SHEET_LEGACY_RE = re.compile(r'<main[^>]*class="[^"]*a4-page[^"]*"[^>]*>')
+
+
+def count_sheets(html: str) -> int:
+    """Number of page-container sheets (both template shapes) in ``html``."""
+    return (len(_SHEET_RE.findall(html))
+            + len(_SHEET_LEGACY_RE.findall(html)))
+
+
+def _ensure_footer_tokens(html: str) -> str:
+    """Re-inject missing footer tokens into .recipe-page sheets.
+
+    Continuation sheets created by cloneNode(true) should preserve the
+    ``<div data-page-footer>`` token, but if any sheet lost it the combiner
+    will extract it without a token and ``inject_page_footer`` will silently
+    skip it.  Walk each ``.recipe-page`` div, and append the token before its
+    closing ``</div>`` when absent.
+    """
+    out: List[str] = []
+    last = 0
+    for m in _SHEET_RE.finditer(html):
+        out.append(html[last:m.start()])
+        start = m.end()
+        depth = 1
+        pos = start
+        close_pos = -1
+        while pos < len(html) and depth > 0:
+            open_idx = html.find('<div', pos)
+            close_idx = html.find('</div>', pos)
+            if close_idx == -1:
+                break
+            if open_idx != -1 and open_idx < close_idx:
+                depth += 1
+                pos = open_idx + 4
+            else:
+                depth -= 1
+                close_pos = close_idx
+                pos = close_idx + 6
+
+        if close_pos != -1:
+            inner = html[start:close_pos]
+            closing = html[close_pos:close_pos + 6]
+        else:
+            inner = html[start:]
+            closing = ''
+
+        if not _FOOTER_TOKEN_RE.search(inner):
+            inner = inner + '<div data-page-footer></div>'
+
+        out.append(m.group(0) + inner + closing)
+        last = pos
+
+    out.append(html[last:])
+    return ''.join(out)
+
 
 _JS_SPLITTER_TEMPLATE = r"""
 () => {
@@ -1914,6 +1981,16 @@ def split_page_file(html_path: str) -> Optional[List[Tuple[str, str]]]:
 
     with open(path, "w", encoding="utf-8") as f:
         f.write(result["html"])
+
+    html = result["html"]
+    token_count = html.count('<div data-page-footer')
+    sheet_count = count_sheets(html)
+    if token_count < sheet_count:
+        html = _ensure_footer_tokens(html)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(html)
+        diags.append(("info", f"{name}: footer token re-injected into "
+                              f"{sheet_count - token_count} continuation sheet(s)"))
 
     diags: List[Tuple[str, str]] = []
     if kind == "recipe":

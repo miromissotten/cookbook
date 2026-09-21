@@ -37,9 +37,14 @@ for _dir in (_SCRIPT_DIR, _HELPERS_DIR):
 # Import modules
 from structure_parser import StructureParser
 from pdf_builder import PDFBuilder
-from page_toc import TOCPageRenderer, display_parts, clean_title_id
+from page_toc import (
+    TOCPageRenderer,
+    chapter_prints_subtoc,
+    clean_title_id,
+    display_parts,
+)
 from page_content import ContentPageRenderer
-from page_splitter import split_page_file
+from page_splitter import split_page_file, count_sheets
 from page_renderer import RecipeParser, RecipeRenderer
 from html_to_pdf import (
     html_to_pdf_combined_with_footer,
@@ -48,7 +53,7 @@ from html_to_pdf import (
     _get_browser,
 )
 from mermaid_renderer import bake_mermaid_in_file
-from graph_scatterplot import render_scatterplot_png
+from graph_scatterplot import render_scatterplot_png, _parse_table
 from graph_radar import render_radar_png, PRINT_WIDTH_MM
 from generation_report import render_report_markdown
 from report_summary import summarize_diagnostics
@@ -388,7 +393,8 @@ class CookbookGenerator:
     RADAR_IMG_ALT = 'Radar chart of the flavour profile'
 
     def _graph_block_to_img(self, table_text: str, kind: str, renderer,
-                            alt: str, style: str) -> str:
+                            alt: str, style: str,
+                            headers: Optional[List[str]] = None) -> str:
         """Render one graph table into an ``<img>`` tag, or '' when it fails.
 
         A graph that cannot be drawn must never take the build down: the reason
@@ -396,7 +402,7 @@ class CookbookGenerator:
         """
         try:
             png_path = self.temp_dir / f"{kind.lower()}_{uuid.uuid4().hex}.png"
-            png_uri = renderer(table_text, str(png_path))
+            png_uri = renderer(table_text, str(png_path), headers=headers)
         except Exception as exc:
             warn(f"Could not render {kind.lower()} graph: {exc}")
             return ''
@@ -411,8 +417,11 @@ class CookbookGenerator:
         the build.
         """
         def _replace(match: re.Match) -> str:
+            table_text = match.group(1).strip()
+            headers = (_parse_table(table_text)[0]
+                       if kind == self.SCATTERPLOT_KIND else None)
             img_html = self._graph_block_to_img(
-                match.group(1).strip(), kind, renderer, alt, style)
+                table_text, kind, renderer, alt, style, headers=headers)
             return img_html or match.group(0)
 
         return re.sub(
@@ -1067,8 +1076,36 @@ class CookbookGenerator:
                                      blank_html)
         return (path, chapter, subsection, False)
 
+    def _chapter_anchor_sheets(self, count: int, prints_subtoc: bool
+                               ) -> List[Tuple[int, bool, str]]:
+        """Sheets of a chapter block that are pinned to a page side.
+
+        Each anchor is ``(job index, opens on an even page, blank position
+        label)``: a chapter's text opens the spread's left (even) page and
+        its sub-TOC the right (odd) one (ADR 0015). A text-only chapter
+        (ADR 0026) anchors just its prose sheet - the pages printed after it
+        face that sheet.
+        """
+        if not prints_subtoc:
+            return [(0, True, "before intro")]
+        if count >= 2:
+            return [(0, True, "before intro"),
+                    (1, False, "between intro and sub-TOC")]
+        return [(0, False, "before sub-TOC")]
+
+    @staticmethod
+    def _parity_blank_needed(placed: int, opens_even: bool) -> bool:
+        """Whether a blank must precede a sheet that must open on a side.
+
+        ``placed`` sheets are already in the book, so the next sheet lands on
+        physical page ``placed + 1``; page 1 is a right-hand page, hence even
+        numbers print left (ADR 0015).
+        """
+        return ((placed + 1) % 2 == 0) != opens_even
+
     def _insert_parity_blanks(self, pdf_jobs: List[Tuple[str, str, str, bool]],
-                              chapter_blocks: List[Tuple[str, int, int]]) -> None:
+                              chapter_blocks: List[Tuple[str, int, int, bool]]
+                              ) -> None:
         """Insert blank sheets so chapter blocks open on the correct side of
         a printed spread (ADR 0015).
 
@@ -1076,12 +1113,15 @@ class CookbookGenerator:
         print on the left. The title-verso blank (ADR 0019) is already part
         of ``pdf_jobs`` and counts here like any other sheet. Walking the
         book in order and counting real sheets per job (post-split, so
-        continuation sheets count), each chapter block must satisfy:
+        continuation sheets count), the sheets ``_chapter_anchor_sheets``
+        names must satisfy:
 
         - with intro prose: the intro's first sheet lands on an even page and
           the sub-TOC on an odd page (a blank goes between when the intro
           spans an even number of sheets);
-        - without intro prose: the sub-TOC lands on an odd page.
+        - without intro prose: the sub-TOC lands on an odd page;
+        - text-only chapter (ADR 0026, no sub-TOC sheet): the prose sheet
+          lands on an even page.
 
         Blanks join the chapter's (chapter, subsection) footer label, so they
         group and print footers/page numbers exactly like the pages they
@@ -1091,8 +1131,8 @@ class CookbookGenerator:
             return
 
         parity_diags: List[Tuple[str, str]] = []
-        blocks = {start: (label, count)
-                  for label, start, count in chapter_blocks}
+        blocks = {start: (label, count, prints_subtoc)
+                  for label, start, count, prints_subtoc in chapter_blocks}
 
         def sheet_count(html_file: str) -> int:
             try:
@@ -1116,9 +1156,8 @@ class CookbookGenerator:
                 idx += 1
                 continue
 
-            label, count = blocks[idx]
+            label, count, prints_subtoc = blocks[idx]
             block_jobs = pdf_jobs[idx:idx + count]
-            has_intro = count >= 2
             chapter, subsection = block_jobs[0][1], block_jobs[0][2]
 
             def add_blank(position: str) -> None:
@@ -1134,20 +1173,22 @@ class CookbookGenerator:
                     ("info", f"parity: blank inserted {position} "
                              f"({label or 'chapter'}) (page {placed})"))
 
-            if has_intro:
-                if placed % 2 == 0:  # next page odd; text must open even
-                    add_blank("before intro")
-                for job in block_jobs[:-1]:  # intro pages (may span sheets)
-                    jobs.append(job)
-                    placed += sheet_count(job[0])
-                if placed % 2 == 1:  # next page even; sub-TOC must open odd
-                    add_blank("between intro and sub-TOC")
-            else:
-                if placed % 2 == 1:  # next page even; sub-TOC must open odd
-                    add_blank("before sub-TOC")
+            anchors = self._chapter_anchor_sheets(count, prints_subtoc)
+            for job_index, opens_even, position in anchors:
+                # The anchor decides its side; the sheet's own count (it may
+                # span continuation sheets) sets up the next anchor.
+                if self._parity_blank_needed(placed, opens_even):
+                    add_blank(position)
+                jobs.append(block_jobs[job_index])
+                placed += sheet_count(block_jobs[job_index][0])
 
-            jobs.append(block_jobs[-1])  # the sub-TOC page
-            placed += sheet_count(block_jobs[-1][0])
+            # Sheets the renderer emits beyond the anchored ones. The known
+            # chapter shapes anchor the whole block, so this is a guard that
+            # nothing can be dropped from the book.
+            for job in block_jobs[len(anchors):]:
+                jobs.append(job)
+                placed += sheet_count(job[0])
+
             idx += count
 
         if blank_no or parity_diags:
@@ -1412,8 +1453,9 @@ class CookbookGenerator:
             non_recipe_lookup[filename].append(html_path)
 
         # Chapter blocks in book order: (chapter label, first job index,
-        # page count) - consumed by the parity pass (ADR 0015).
-        chapter_blocks: List[Tuple[str, int, int]] = []
+        # page count, prints a sub-TOC sheet) - consumed by the parity pass
+        # (ADR 0015/0026).
+        chapter_blocks: List[Tuple[str, int, int, bool]] = []
 
         for filename in files_to_process:
             chapter, subsection = file_to_chapter_sub.get(filename, ('', ''))
@@ -1424,8 +1466,9 @@ class CookbookGenerator:
                     chapter_subtrees[filename].get("name", ""))[1]
             is_notdone = self._is_notdone_file(filename)
             if filename == '_Annex.A. Full Table Of Contents.md':
+                title = filename.replace('.md', '').replace('_', ' ').title()
                 full_toc_html = TOCPageRenderer().render_full_toc(
-                    TOC_PAGE_TITLE, hierarchy,
+                    title, hierarchy,
                     link_resolver=lambda ref: self._resolve_wiki_page(ref)[0],
                 )
                 full_toc_file = self._write_temp_html('temp_full_toc', full_toc_html)
@@ -1440,7 +1483,8 @@ class CookbookGenerator:
                 if filename in chapter_subtrees:
                     chapter_blocks.append(
                         (chapter, len(pdf_jobs),
-                         len(non_recipe_lookup[filename])))
+                         len(non_recipe_lookup[filename]),
+                         chapter_prints_subtoc(chapter_subtrees[filename])))
                 for html_path in non_recipe_lookup[filename]:
                     pdf_jobs.append((html_path, chapter, subsection, is_notdone))
 
@@ -1515,6 +1559,20 @@ class CookbookGenerator:
                 section_pdfs.append(str(pdf_path))
                 reader = PdfReader(str(pdf_path))
                 num_pages = len(reader.pages)
+                total_sheets = 0
+                total_tokens = 0
+                for src in files:
+                    try:
+                        with open(src, 'r', encoding='utf-8') as fh:
+                            src_html = fh.read()
+                    except OSError:
+                        continue
+                    total_sheets += count_sheets(src_html)
+                    total_tokens += src_html.count('<div data-page-footer')
+                if total_tokens != total_sheets:
+                    print(f"Warning: {label}: footer token count ({total_tokens}) "
+                          f"does not match sheet count ({total_sheets}); "
+                          f"{num_pages} physical page(s) in PDF")
                 # Commit measurements only for groups that actually printed;
                 # a failed conversion's geometry would misalign every page.
                 for payload in measured_batch:

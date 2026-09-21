@@ -71,6 +71,14 @@ class RadarTableRendering(unittest.TestCase):
         self.assertGreater(self.png_path.stat().st_size, 0)
         self.assertTrue(uri.startswith("file:///"), uri)
 
+    def test_accepts_the_generators_headers_kwarg(self):
+        # _graph_block_to_img passes headers= to every graph renderer; the
+        # radar chart ignores it because its axis names live in the table's
+        # first row (the scatterplot, by contrast, uses them as labels).
+        uri = render_radar_png(RADAR_TABLE, str(self.png_path), headers=None)
+        self.assertTrue(self.png_path.is_file())
+        self.assertTrue(uri.startswith("file:///"), uri)
+
     def test_table_without_a_data_row_is_rejected(self):
         header_only = "| Acid | Richness | Sweet | Umami | Heat | Thickness |"
         with self.assertRaises(ValueError):

@@ -75,6 +75,11 @@ _PAGE_FOOTER_RE = re.compile(
     r'<div\s+data-page-footer(?:\s*=\s*"[^"]*")?\s*/?>')
 
 
+def count_footer_tokens(html_text: str) -> int:
+    """Number of page-footer tokens (bare or `="") in ``html_text``."""
+    return len(_PAGE_FOOTER_RE.findall(html_text))
+
+
 def _path_to_uri(path_str: str) -> str:
     """Properly encoded file:/// URI for a Windows path (spaces, '&', ...)."""
     return Path(path_str).resolve().as_uri()
@@ -175,11 +180,20 @@ def _convert_single_to_pdf(input_file: str, output_file: str, footer_html: Optio
     load_path = input_file
     footer_tmp = None
     try:
+        with open(input_file, 'r', encoding='utf-8') as f:
+            text = f.read()
+        token_count = count_footer_tokens(text)
+        # Local import: page_splitter imports this module at load time, so
+        # a module-level import here would be circular (same pattern as the
+        # seam-audit import further down).
+        from page_splitter import count_sheets
+        sheet_count = count_sheets(text)
+        if token_count != sheet_count:
+            print(f"Warning: footer token count ({token_count}) does not match "
+                  f".recipe-page count ({sheet_count}) in {os.path.basename(input_file)}")
         # In-page footers live inside the sheet markup behind a token; bake the
         # group's footer into a temp copy so the original stays reusable.
         if footer_html:
-            with open(input_file, 'r', encoding='utf-8') as f:
-                text = f.read()
             injected = inject_page_footer(text, footer_html)
             if injected != text:
                 footer_tmp = input_file + '.footertmp.html'

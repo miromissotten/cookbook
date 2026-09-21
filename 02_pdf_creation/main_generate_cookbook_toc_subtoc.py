@@ -32,7 +32,7 @@ for _dir in (_SCRIPT_DIR, _HELPERS_DIR):
 # Import modules
 from structure_parser import StructureParser
 from input_roots import PathSpec, find_file, resolve_roots
-from page_toc import TOCPageRenderer
+from page_toc import TOCPageRenderer, chapter_prints_subtoc
 from html_to_pdf import (
     html_to_pdf_combined_with_footer,
     build_footer_template,
@@ -191,6 +191,12 @@ class TOCSubTOCGenerator:
                 title, subtree, content_html=prose_html,
                 link_resolver=lambda ref: self._resolve_wiki_page(ref)[0])
 
+            # ADR 0015/0026: [intro?] + sub-TOC, or a lone text sheet for a
+            # chapter that prints no sub-TOC.
+            prints_subtoc = chapter_prints_subtoc(subtree)
+            intro_label = ("Chapter intro" if prints_subtoc
+                           else "Chapter text")
+
             # Write each page to a separate HTML file
             for i, page_html in enumerate(chapter_pages):
                 if len(chapter_pages) > 1:
@@ -199,8 +205,8 @@ class TOCSubTOCGenerator:
                     page_name = f"chapter_{chapter_name}"
                 chapter_path = self._write_temp_html(page_name, page_html)
                 html_files.append((page_name, chapter_path))
-                if i == 0 and len(chapter_pages) > 1:
-                    print(f"  Chapter intro: {chapter_path}")
+                if i == 0 and (len(chapter_pages) > 1 or not prints_subtoc):
+                    print(f"  {intro_label}: {chapter_path}")
                 else:
                     print(f"  Chapter sub-TOC: {chapter_path}")
 

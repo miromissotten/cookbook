@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>1. Architectures</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="lib/fonts/fonts.css" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                "colors": {
+                    "surface-container-low": "#f1f4f2",
+                    "on-secondary": "#edfee2",
+                    "primary": "#47664a",
+                    "secondary-fixed-dim": "#c9dabf",
+                    "on-surface-variant": "#59615f",
+                    "secondary-fixed": "#d7e8cd",
+                    "inverse-on-surface": "#9b9d9c",
+                    "secondary-container": "#d7e8cd",
+                    "surface": "#ffffff",
+                    "on-error": "#fff7f6",
+                    "on-error-container": "#6e1400",
+                    "surface-container-lowest": "#ffffff",
+                    "outline": "#757c7a",
+                    "background": "#ffffff",
+                    "tertiary": "#5a6331",
+                    "surface-variant": "#dde4e1",
+                    "outline-variant": "#acb4b1",
+                    "on-surface": "#2d3432",
+                    "surface-container": "#eaefec",
+                    "on-primary": "#e9ffe6",
+                    "secondary": "#54634e"
+                },
+                "fontFamily": {
+                    "headline": ["Manrope", "sans-serif"],
+                    "body": ["Work Sans", "sans-serif"],
+                    "label": ["Plus Jakarta Sans", "sans-serif"]
+                }
+            }
+        }
+    }
+</script>
+<style>
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .recipe-page {
+        width: 210mm;
+        height: 297mm;
+        padding: 25mm 15mm 15mm 25mm; /* Top 25, Right 15, Bottom 15, Left 25 (= 15 base + 10mm book gutter) */
+        box-sizing: border-box;
+        background: #ffffff;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    @media print {
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .recipe-page {
+            margin: 0;
+            box-shadow: none !important;
+            border: none;
+            page-break-after: always;
+            break-after: page;
+            page-break-inside: avoid;
+        }
+        /* Multi-sheet documents stack vertically when printed. */
+        main {
+            display: block !important;
+            padding: 0 !important;
+            min-height: 0 !important;
+        }
+    }
+    /* ---- CHAPTER SUB-TOC: CLEAR HIERARCHY ---- */
+    .toc-hierarchy {
+        padding-left: 5mm;
+    }
+    /* Level 1: Chapter headers - prominent full-width bar */
+    .toc-hierarchy .toc-level-1 {
+        background: #47664a;
+        color: #ffffff;
+        padding: 1rem 1.25rem;
+        margin-top: 2rem;
+        margin-bottom: 0.75rem;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(71, 102, 74, 0.25);
+    }
+    .toc-hierarchy .toc-level-1:first-child {
+        margin-top: 0;
+    }
+    .toc-hierarchy .toc-level-1 .toc-entry-text {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    .toc-hierarchy .toc-level-1 .toc-pos {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.15rem 0.4rem;
+        border-radius: 3px;
+        font-weight: 600;
+        font-size: 0.72rem;
+    }
+    /* Level 2: Section headers - card style with colored background */
+    .toc-hierarchy .toc-level-2 {
+        background: #d7e8cd;
+        color: #2d3432;
+        padding: 0.6rem 1rem;
+        margin-top: 1rem;
+        margin-bottom: 0.4rem;
+        margin-left: 1.5rem;
+        border-left: 3px solid #47664a;
+        border-radius: 0 4px 4px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .toc-hierarchy .toc-level-2:first-child {
+        margin-top: 0;
+    }
+    .toc-hierarchy .toc-level-2 .toc-entry-text {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #2d3432;
+    }
+    /* Level 3: Subsection rows - left accent with background */
+    .toc-hierarchy .toc-level-3 {
+        background: rgba(71, 102, 74, 0.04);
+        border-left: 3px solid #47664a;
+        padding: 0.5rem 1rem;
+        margin-left: 1.5rem;
+        margin-top: 0.35rem;
+        border-radius: 0 4px 4px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .toc-hierarchy .toc-level-3 .toc-entry-text {
+        font-family: 'Manrope', sans-serif;
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #2d3432;
+    }
+    .toc-hierarchy .toc-level-3 .toc-pos {
+        color: #47664a;
+        font-weight: 600;
+        font-size: 0.72rem;
+        margin-right: 0.5rem;
+    }
+    /* Level 4: Item rows - indented with dot leader */
+    .toc-hierarchy .toc-level-4 {
+        padding: 0.35rem 1rem;
+        margin-left: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px dotted rgba(71, 102, 74, 0.15);
+    }
+    .toc-hierarchy .toc-level-4 .toc-entry-text {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 400;
+        font-size: 0.82rem;
+        color: #59615f;
+    }
+    .toc-hierarchy .toc-level-4 .toc-pos {
+        color: #9b9d9c;
+        font-weight: 500;
+        font-size: 0.68rem;
+        margin-right: 0.5rem;
+    }
+    /* Level 5+: Deeper items - more indented, smaller */
+    .toc-hierarchy .toc-level-4.toc-depth-5 {
+        margin-left: 4.5rem;
+    }
+    .toc-hierarchy .toc-level-4.toc-depth-5 .toc-entry-text {
+        font-size: 0.78rem;
+        color: #757c7a;
+    }
+    /* ---- SHARED STYLES ---- */
+    .toc-page-num {
+        min-width: 24px;
+        text-align: right;
+    }
+    .toc-pos {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-weight: 500;
+        font-size: 0.72rem;
+        color: #9b9d9c;
+        margin-right: 0.45em;
+    }
+    .toc-hierarchy .toc-level-2 .toc-pos {
+        color: #47664a;
+        background: rgba(71, 102, 74, 0.12);
+        padding: 0.15rem 0.4rem;
+        border-radius: 3px;
+        font-weight: 600;
+        font-size: 0.72rem;
+        margin-right: 0.5rem;
+    }
+    /* ---- CHAPTER INTRO PAGE ---- */
+    .chapter-intro-standalone {
+        padding: 0;
+        font-family: 'Work Sans', sans-serif;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        color: #59615f;
+    }
+    .chapter-intro-standalone p {
+        margin-bottom: 0.75rem;
+    }
+    /* Same blockquote treatment as the content pages (page_content.py):
+       chapter intros use their own stylesheet, so parity lives here. */
+    .chapter-intro-standalone blockquote {
+        margin: 0 0 0.75rem 0;
+        padding: 0.2rem 0 0.2rem 0.9rem;
+        border-left: 2.5pt solid rgba(71, 102, 74, 0.55);
+        font-style: italic;
+        color: #59615f;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+    .chapter-intro-standalone blockquote p {
+        margin: 0;
+    }
+    /* Fix letter-spacing for h1 headers */
+    h1.font-headline {
+        letter-spacing: normal !important;
+    }
+</style>
+</head>
+<body class="font-body text-on-surface print:bg-white">
+<main class="py-8 print:py-0 flex justify-center items-center min-h-screen w-full">
+<div class="recipe-page">
+    <!-- Header Section -->
+    <div class="flex justify-between items-start mb-6">
+        <div class="flex-grow">
+            <h1 class="font-headline font-extrabold text-[3rem] leading-none tracking-tighter text-on-surface mb-3" id="page-1-architectures">1. Architectures</h1>
+                        <svg class="toc-title-underline" viewBox="0 0 1200 24"
+                             preserveAspectRatio="none" style="width:100%; height:24px;">
+              <line x1="4" y1="14" x2="1196" y2="14"
+                    stroke="#47664a" stroke-opacity="0.55"
+                    stroke-width="3" stroke-linecap="round"/>
+              <line x1="8" y1="17" x2="1192" y2="17"
+                    stroke="#47664a" stroke-opacity="0.3"
+                    stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+    </div>
+    <!-- TOC Content -->
+    <div class="flex-grow overflow-hidden">
+        <div class="toc-hierarchy content-text">
+<div class="toc-level-2 toc-section-header"><span class="toc-pos">1.1</span><span class="toc-entry-text">Ramen</span></div>
+<div class="toc-level-3 toc-subsection-row"><span class="toc-pos">1.1.0</span><span class="toc-entry-text">Ramen flowchart</span></div>
+<div class="toc-level-3 toc-subsection-row"><span class="toc-pos">1.1.1</span><span class="toc-entry-text">Ramen</span></div>
+<div class="toc-level-2 toc-section-header"><span class="toc-pos">3.1</span><span class="toc-entry-text">Vegan Chashu</span></div>
+</div>
+    </div>
+<div data-page-footer></div>
+</div>
+
+</main>
+</body>
+</html>

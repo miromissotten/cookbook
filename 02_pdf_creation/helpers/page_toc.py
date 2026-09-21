@@ -69,6 +69,26 @@ def _entry_name(item: object) -> str:
 # chapter, e.g. "_2.2.4.1. Simple bread" (depth 4), with one level spare.
 CHAPTER_TOC_MAX_DEPTH = 5
 
+# Chapters that print without a sub-TOC sheet (ADR 0026). The front-matter
+# preface opens with its prose and its entries print on the very next pages,
+# so a sub-TOC sheet would only restate them. Keyed on the chapter's
+# top-level position label ("0" = "_0. cookbook_Preface"), which survives
+# retitling the chapter.
+SUBTOC_LESS_CHAPTERS = {"0"}
+
+
+def chapter_prints_subtoc(subtree: Dict) -> bool:
+    """Whether a chapter block prints its sub-TOC sheet (ADR 0026).
+
+    Every chapter prints one except the front-matter preface
+    (``SUBTOC_LESS_CHAPTERS``). A chapter that prints none is text-only:
+    ``render_chapter`` still emits its prose sheet, so its block is never
+    empty and never more than one sheet.
+    """
+    pos_label, _ = display_parts(_entry_name(subtree))
+    root_label = pos_label.split(".")[0] if pos_label else ""
+    return root_label not in SUBTOC_LESS_CHAPTERS
+
 
 def clean_title_id(title: str) -> str:
     """Anchor id body for a page title: spaces and underscores read as
@@ -177,6 +197,10 @@ class TOCPageRenderer:
         Page 1: Chapter Title + Intro prose (only if content_html is non-empty)
         Page 2: Chapter Title + Sub-TOC
 
+        A chapter listed in ``SUBTOC_LESS_CHAPTERS`` prints its text sheet
+        only, with no sub-TOC sheet (ADR 0026). That sheet is emitted even
+        when the chapter authored no prose, so its block is never empty.
+
         Args:
             title: Page title (also anchors the page id on the h1)
             subtree: The chapter's section dict from the structure hierarchy
@@ -185,8 +209,13 @@ class TOCPageRenderer:
             max_depth: Deepest numbering level shown (default 5: x.x.x.x.x)
 
         Returns:
-            List of HTML pages (1 or 2 elements depending on content_html)
+            List of HTML pages (1 or 2 elements, see the shapes above)
         """
+        # Text-only chapter (ADR 0026): its entries print on the pages right
+        # after the prose, so the prose sheet is the whole block.
+        if not chapter_prints_subtoc(subtree):
+            return [self._build_chapter_intro_page(title, content_html or '')]
+
         pages: List[str] = []
 
         # Page 1: Intro prose (only if there's content). The chapter text
@@ -257,49 +286,10 @@ class TOCPageRenderer:
         the book's two navigation pages speak one visual hierarchy. Entries
         numbered deeper than ``max_depth`` are omitted.
         """
-        html_parts = ['<div class="toc-main-toc content-text">']
-
-        for section in sections:
-            section_name = section.get("name", "Untitled")
-            children = section.get("children", [])
-
-            if _numbering_depth(section_name) > max_depth:
-                continue
-
-            pos_label, _ = display_parts(section_name)
-            chapter_key = pos_label.split(".")[0] if pos_label else ""
-
-            html_parts.append(
-                f'<div class="toc-chapter-group toc-section" data-chapter="{chapter_key}">')
-
-            sec_inner, sec_target = self._entry_link(section_name, link_resolver)
-            tgt = f' data-toc-target="{sec_target}"' if sec_target else ''
-            html_parts.append(
-                f'<div class="toc-row toc-chapter-header"{tgt}>'
-                f'{sec_inner}<span class="toc-page-num"></span></div>')
-
-            if children:
-                html_parts.append('<div class="toc-subsection-list toc-items">')
-                for child in children:
-                    if isinstance(child, dict):
-                        child_name = child.get("name", "Untitled")
-                    else:
-                        child_name = str(child)
-
-                    if _numbering_depth(child_name) > max_depth:
-                        continue
-
-                    if isinstance(child, dict) and child.get("type") == "subsection":
-                        row_classes = "toc-row toc-subsection-row"
-                    else:
-                        row_classes = "toc-row toc-item-row"
-                    html_parts.append(
-                        self._row_html(child_name, row_classes, link_resolver))
-                html_parts.append("</div>")
-
-            html_parts.append("</div>")
-
-        html_parts.append("</div>")
+        html_parts = ['<div class="toc-hierarchy content-text">']
+        nested = nest_entries_by_position(sections)
+        self._append_hierarchy_rows(html_parts, nested, link_resolver, max_depth)
+        html_parts.append('</div>')
         return "\n".join(html_parts)
 
     def _row_html(self, name: str, row_classes: str, link_resolver) -> str:
@@ -463,73 +453,6 @@ class TOCPageRenderer:
             min-height: 0 !important;
         }}
     }}
-    /* ---- MAIN TOC: HIERARCHY ACCENT ROWS ---- */
-    .toc-main-toc {{
-        padding-left: 5mm;
-    }}
-    .toc-main-toc .toc-row {{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.3rem 0.75rem;
-        min-width: 0;
-    }}
-    /* Chapter bars: full-width accent bars (visuals unchanged from the
-       editorial design; re-scoped to the flex rows). */
-    .toc-main-toc .toc-chapter-header {{
-        background: rgba(71, 102, 74, 0.08);
-        border-left: 3px solid #47664a;
-        border-radius: 0 4px 4px 0;
-        padding: 0.5rem 0.75rem;
-        margin-top: 1.25rem;
-        margin-bottom: 0.5rem;
-    }}
-    .toc-main-toc .toc-chapter-header:first-child {{
-        margin-top: 0;
-    }}
-    .toc-main-toc .toc-chapter-header .toc-entry-text {{
-        font-family: 'Manrope', sans-serif;
-        font-weight: 700;
-        font-size: 1.05rem;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
-        color: #2d3432;
-    }}
-    .toc-main-toc .toc-chapter-header .toc-pos {{
-        background: rgba(71, 102, 74, 0.12);
-        padding: 0.15rem 0.4rem;
-        border-radius: 3px;
-        color: #47664a;
-        font-weight: 600;
-    }}
-    .toc-main-toc .toc-chapter-group {{
-        margin-bottom: 1.5rem;
-    }}
-    /* Subchapter rows: depth-2 entries descend visibly under the chapter,
-       speaking the chapter sub-TOC's level-3 accent language. */
-    .toc-main-toc .toc-subsection-row,
-    .toc-main-toc .toc-item-row {{
-        background: rgba(71, 102, 74, 0.04);
-        border-left: 3px solid #47664a;
-        border-radius: 0 4px 4px 0;
-        margin-left: 1.5rem;
-        margin-top: 0.35rem;
-        padding: 0.5rem 1rem;
-    }}
-    .toc-main-toc .toc-subsection-row .toc-entry-text,
-    .toc-main-toc .toc-item-row .toc-entry-text {{
-        font-family: 'Manrope', sans-serif;
-        font-weight: 600;
-        font-size: 0.9rem;
-        color: #2d3432;
-    }}
-    .toc-main-toc .toc-subsection-row .toc-pos,
-    .toc-main-toc .toc-item-row .toc-pos {{
-        color: #47664a;
-        font-weight: 600;
-        font-size: 0.72rem;
-        margin-right: 0.5rem;
-    }}
     /* ---- CHAPTER SUB-TOC: CLEAR HIERARCHY ---- */
     .toc-hierarchy {{
         padding-left: 5mm;
@@ -566,34 +489,26 @@ class TOCPageRenderer:
     }}
     /* Level 2: Section headers - card style with colored background */
     .toc-hierarchy .toc-level-2 {{
-        background: linear-gradient(135deg, #47664a 0%, #3a553d 100%);
-        color: #ffffff;
-        padding: 0.75rem 1rem;
-        margin-top: 1.5rem;
-        margin-bottom: 0.5rem;
-        border-radius: 6px;
+        background: #d7e8cd;
+        color: #2d3432;
+        padding: 0.6rem 1rem;
+        margin-top: 1rem;
+        margin-bottom: 0.4rem;
+        margin-left: 1.5rem;
+        border-left: 3px solid #47664a;
+        border-radius: 0 4px 4px 0;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        box-shadow: 0 2px 8px rgba(71, 102, 74, 0.25);
     }}
     .toc-hierarchy .toc-level-2:first-child {{
         margin-top: 0;
     }}
     .toc-hierarchy .toc-level-2 .toc-entry-text {{
         font-family: 'Manrope', sans-serif;
-        font-weight: 700;
-        font-size: 1rem;
-        color: #ffffff;
-    }}
-    .toc-hierarchy .toc-level-2 .toc-pos {{
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.2rem 0.5rem;
-        border-radius: 4px;
-        color: #ffffff;
         font-weight: 600;
-        font-size: 0.75rem;
-        margin-right: 0.5rem;
+        font-size: 0.95rem;
+        color: #2d3432;
     }}
     /* Level 3: Subsection rows - left accent with background */
     .toc-hierarchy .toc-level-3 {{
@@ -659,6 +574,15 @@ class TOCPageRenderer:
         font-size: 0.72rem;
         color: #9b9d9c;
         margin-right: 0.45em;
+    }}
+    .toc-hierarchy .toc-level-2 .toc-pos {{
+        color: #47664a;
+        background: rgba(71, 102, 74, 0.12);
+        padding: 0.15rem 0.4rem;
+        border-radius: 3px;
+        font-weight: 600;
+        font-size: 0.72rem;
+        margin-right: 0.5rem;
     }}
     /* ---- CHAPTER INTRO PAGE ---- */
     .chapter-intro-standalone {{
@@ -770,25 +694,25 @@ if __name__ == "__main__":
     sections = [
         {
             "type": "section",
-            "name": "Preface",
+            "name": "_1. Preface",
             "children": [
-                {"type": "subsection", "name": "Introduction", "children": []},
+                {"type": "subsection", "name": "_1.1. Introduction", "children": []},
             ],
         },
         {
             "type": "section",
-            "name": "Architectures",
+            "name": "_2. Architectures",
             "children": [
-                {"type": "subsection", "name": "Bowl Systems", "children": []},
-                {"type": "subsection", "name": "Noodle Families", "children": []},
-                {"type": "item", "name": "Broth Basics"},
+                {"type": "subsection", "name": "_2.1. Bowl Systems", "children": []},
+                {"type": "subsection", "name": "_2.2. Noodle Families", "children": []},
+                {"type": "item", "name": "_2.3. Broth Basics"},
             ],
         },
         {
             "type": "section",
-            "name": "Level-Up (Sauces)",
+            "name": "_3. Level-Up (Sauces)",
             "children": [
-                {"type": "subsection", "name": "Chilli Crisp", "children": []},
+                {"type": "subsection", "name": "_3.1. Chilli Crisp", "children": []},
             ],
         },
     ]
@@ -802,8 +726,8 @@ if __name__ == "__main__":
     # type.
     body_start = html.index('<body')
     body_html = html[body_start:]
-    assert 'class="toc-main-toc' in body_html, (
-        "main TOC missing .toc-main-toc container")
+    assert 'class="toc-hierarchy' in body_html, (
+        "main TOC missing .toc-hierarchy container")
     assert 'class="toc-flavortree' not in body_html, (
         "main TOC still uses .toc-flavortree class on body elements")
     assert 'toc-connector' not in body_html, (
@@ -812,9 +736,9 @@ if __name__ == "__main__":
         "main TOC still emits three-column grid spans")
     assert 'toc-col-subchapter' not in body_html, (
         "main TOC still emits three-column grid spans")
-    assert 'class="toc-row toc-chapter-header"' in body_html, (
+    assert 'class="toc-level-1 toc-section-header"' in body_html, (
         "main TOC missing chapter header rows")
-    assert 'class="toc-row toc-subsection-row"' in body_html, (
+    assert 'class="toc-level-2 toc-section-header"' in body_html, (
         "main TOC missing subsection accent rows")
     print("smoke assertions OK")
 

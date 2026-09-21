@@ -10,6 +10,7 @@ convention.
 import math
 import re
 from pathlib import Path
+from typing import List, Optional
 
 import matplotlib
 matplotlib.use("Agg")
@@ -83,12 +84,17 @@ def _parse_table(table_text: str):
     return labels, values
 
 
-def render_radar_png(table_text: str, output_path: str) -> str:
+def render_radar_png(table_text: str, output_path: str,
+                     headers: Optional[List[str]] = None) -> str:
     """Render a radar chart from a markdown pipe-table and return a ``file:///`` URI.
 
     Args:
         table_text: Raw table text (markdown pipe-table, without the marker lines).
         output_path: Filesystem path to write the PNG into.
+        headers: Ignored. The radar table carries its axis names in its first
+            row, so unlike the scatterplot it needs no header hints; the
+            parameter exists only so the generator can hand every graph
+            renderer the same keyword arguments.
 
     Returns:
         A ``file:///`` URI for the saved PNG.

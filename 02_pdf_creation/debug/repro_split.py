@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT / "helpers"))
 
 from structure_parser import StructureParser  # noqa: E402
 from page_toc import TOCPageRenderer, clean_title_id  # noqa: E402
-from page_splitter import split_page_file  # noqa: E402
+from page_splitter import split_page_file, count_sheets  # noqa: E402
 
 DATA_DIR = ROOT.parent / "data_modularflavour" / "text"
 OUT = ROOT / "debug" / "repro_chapter.html"
@@ -56,7 +56,7 @@ result = split_page_file(str(OUT))
 print("split result:", result)
 
 out = OUT.read_text(encoding="utf-8")
-sheets = out.count('class="recipe-page"')
+sheets = count_sheets(out)
 print("recipe-page sheets after split:", sheets)
 rows = re.findall(r'data-toc-target="([^"]+)"', out)
 print("rows after split:", len(rows))

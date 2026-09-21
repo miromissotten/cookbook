@@ -225,10 +225,13 @@ The cleaned title printed in the table of contents: leading underscore stripped,
 The book's overview table of contents: each chapter as an accent bar with its depth-2 entries (subsections and chapter-level items) descending beneath as indented accent rows. Deeper entries are listed on the chapter pages, not here. _Avoid_: table of contents (ambiguous with the chapter sub-TOC)
 
 **Chapter sub-TOC**:
-The deep flavour-tree listing on the sheet(s) directly after a chapter's intro text: every page nested below that chapter, stepped down by depth with gradient cards, accent rows and indented items. Opens on the odd (right-hand) page of the chapter spread. _Avoid_: sub-table of contents (skips the book's numbering language)
+The deep flavour-tree listing on the sheet(s) directly after a chapter's intro text: every page nested below that chapter, stepped down by depth with gradient cards, accent rows and indented items. Opens on the odd (right-hand) page of the chapter spread. Not every chapter prints one: a text-only chapter has no interior to map and leaves the sheet out (ADR 0026). _Avoid_: sub-table of contents (skips the book's numbering language)
 
 **Chapter spread**:
 The chapter opening pattern: the chapter's intro text (if any) on the even (left-hand) page and its sub-TOC on the following odd (right-hand) page, enforced by inserting parity blanks where the natural flow would violate it. Chapter links land on the intro page, the block's first sheet. _Avoid_: chapter opener, chapter main pages
+
+**Text-only chapter**:
+A chapter whose block is its text sheet alone, with no sub-TOC sheet: the front-matter preface, whose entries print on the pages directly after it (ADR 0026). Its text opens the even (left-hand) page like every other chapter's, and the page that follows faces it from the right. _Avoid_: preface-only chapter, short chapter
 
 ### Meta
 
