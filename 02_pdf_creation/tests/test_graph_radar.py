@@ -5,13 +5,13 @@ A sauce recipe authors its taste profile as a table of six 0-5 axes inside a
 scatterplot uses). The block is rendered to a PNG by ``graph_radar`` and printed
 under the recipe's sauce profile chips; a page without a block prints no chart.
 
-Run: python -m unittest discover -s tests -v
+Run: python -m unittest discover -s 02_pdf_creation/tests -v
 """
 import tempfile
 import unittest
 from pathlib import Path
 
-PDF_ROOT = Path(__file__).resolve().parents[1] / "02_pdf_creation"
+PDF_ROOT = Path(__file__).resolve().parents[1]
 
 from graph_radar import render_radar_png
 from main_generate_cookbook import CookbookGenerator

@@ -4,7 +4,7 @@ Covers the structure-file round trip (numbered filename -> markdown ->
 ordered filenames + hierarchy) with tmp_path-free fixtures
 (tempfile + stdlib unittest, no extra dependencies).
 
-Run: python -m unittest discover -s tests -v
+Run: python -m unittest discover -s 02_pdf_creation/tests -v
 """
 import tempfile
 import unittest

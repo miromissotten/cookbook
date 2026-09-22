@@ -6,7 +6,7 @@ A sideinfo page carries its printed body in a `### Text` section, an optional
 reach the page. A file without a `### Text` section keeps rendering its whole
 content, so the pipeline stays backward compatible.
 
-Run: python -m unittest discover -s tests -v
+Run: python -m unittest discover -s 02_pdf_creation/tests -v
 """
 import tempfile
 import unittest

@@ -4,7 +4,7 @@ Covers the ADR 0004 amendment: inject_navigation stamps a footer GoTo link
 ("back to table of contents") on every page from the TOC onwards in the
 digital variant only, and gates against a missing/invalid TOC page.
 
-Run: python -m unittest tests.test_back_to_toc -v
+Run: python -m unittest 02_pdf_creation.tests.test_back_to_toc -v
 """
 import tempfile
 import unittest

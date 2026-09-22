@@ -1,11 +1,14 @@
 """Verify the rebuilt PDF contains the units that were previously clipped/lost.
 
 Scan is in-memory: text is extracted once into a list, then searched.
-Run after a build: python build/verify_pdf.py
+Run after a build: python verify_pdf.py
 """
 import fitz, glob, sys
+from pathlib import Path
 
-FILES = sorted(glob.glob("exports/cookbook_digital.pdf"))
+SCRIPT_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = SCRIPT_DIR.parent.parent
+FILES = sorted(glob.glob(str(PROJECT_ROOT / "exports" / "cookbook_digital.pdf")))
 if not FILES:
     print("No cookbook_digital.pdf found in exports/"); sys.exit(2)
 PDF = FILES[0]

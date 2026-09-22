@@ -4,7 +4,7 @@ Pins the ordered-roots contract of helpers/input_roots.py and its
 consumers (StructureParser, StructureGenerator, CookbookGenerator).
 All fixtures live in temp dirs; no real data folder is touched.
 
-Run: python -m unittest discover -s tests -v
+Run: python -m unittest discover -s 02_pdf_creation/tests -v
 """
 import tempfile
 import unittest

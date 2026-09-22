@@ -10,7 +10,7 @@ details. They are retained because the footer-token/sheet-count contract is
 user-visible (it controls a diagnostic warning) and would be expensive to
 test via full PDF rendering.
 
-Run: python -m unittest tests.test_sheet_counting -v
+Run: python -m unittest 02_pdf_creation.tests.test_sheet_counting -v
 """
 import unittest
 from pathlib import Path

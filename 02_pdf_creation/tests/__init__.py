@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 PDF_ROOT = REPO_ROOT / "02_pdf_creation"
 HELPERS_DIR = PDF_ROOT / "helpers"
 DEBUG_DIR = PDF_ROOT / "debug"

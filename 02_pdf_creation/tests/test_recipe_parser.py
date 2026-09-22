@@ -8,7 +8,7 @@ These are implementation-sensitive but guard specific layout regressions:
 the Aglio e Olio double-stream bug and the instruction-intro marker bug.
 Removing them would allow those regressions to pass silently.
 
-Stdlib unittest style: python -m unittest discover -s tests -v
+Stdlib unittest style: python -m unittest discover -s 02_pdf_creation/tests -v
 """
 import unittest
 from pathlib import Path

@@ -7,6 +7,6 @@ recipe = sys.argv[1]
 tmp = os.path.join(tempfile.gettempdir(), "r2.txt")
 with open(tmp, "w", encoding="utf-8") as fh:
     sys.stdout = fh
-    runpy.run_path("02_pdf_creation/debug/debug_split_recipe.py")
+    runpy.run_path("debug/debug_split_recipe.py")
     sys.stdout = sys.__stdout__
 print("wrote", tmp)

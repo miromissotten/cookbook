@@ -6,7 +6,7 @@ which read the inner [[image]] as a page reference and printed a literal
 raised IndexError in _convert_wiki_embed_to_img, which read group 2
 unconditionally while that pattern only has one group.
 
-Run: python -m unittest discover -s tests -v
+Run: python -m unittest discover -s 02_pdf_creation/tests -v
 """
 import tempfile
 import unittest

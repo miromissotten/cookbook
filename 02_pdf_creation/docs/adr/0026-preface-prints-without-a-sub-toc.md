@@ -52,7 +52,7 @@ exactly as before (text even + sub-TOC odd, or sub-TOC odd alone).
   explicitly, which removes the ambiguity the third shape exposed.
 - `debug/verify_chapter_spread.py` asserts one shape per chapter (`text`,
   `spread`, `subtoc`), and the chapter block shapes are pinned by
-  `tests/test_page_toc_helpers.py`, which is the deterministic guard for "no
+  `02_pdf_creation/tests/test_page_toc_helpers.py`, which is the deterministic guard for "no
   sub-TOC sheet" (a PDF text extraction cannot tell the two one-sheet kinds
   apart).
 - Back-matter blocks stay outside that guard: the parity walk counts one

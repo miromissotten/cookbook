@@ -1,11 +1,11 @@
 """Characterization tests: TOC helpers in helpers/page_toc.py.
 
-Pins current display/nesting behaviour (docs/CONTEXT.md vocabulary, ADR 0014
+Pins current display/nesting behaviour (02_pdf_creation/docs/CONTEXT.md vocabulary, ADR 0014
 depth rules) and the chapter block shapes (ADR 0015 spread, ADR 0026
 text-only) so refactors cannot silently change them.
 
 Stdlib unittest style so the suite runs without extra dependencies:
-python -m unittest discover -s tests -v
+python -m unittest discover -s 02_pdf_creation/tests -v
 """
 import unittest
 from pathlib import Path

@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 from html_to_pdf import ensure_print_fonts
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = Path(__file__).resolve().parents[2]
 HELPERS_DIR = REPO_ROOT / "02_pdf_creation" / "helpers"
 
 

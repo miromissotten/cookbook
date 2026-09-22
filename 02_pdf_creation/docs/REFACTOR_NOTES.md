@@ -6,16 +6,16 @@ time); every step below is reviewable against it.
 
 ## What changed
 
-### 1. Characterization test suite (new `tests/`, stdlib `unittest` only)
+### 1. Characterization test suite (new `02_pdf_creation/tests/`, stdlib `unittest` only)
 No test framework existed. Added fast, browser-free tests that pin current
 behavior *before* any refactor, so future edits are reviewable and revertable:
 
 | File | Pins |
 |---|---|
-| `tests/test_page_toc_helpers.py` (9) | TOC title cleaning, display parts, numbering depth, position-based nesting, depth caps (ADR 0014/0015) |
-| `tests/test_recipe_parser.py` (10) | Tolerant multi-shape parsing (ADR 0001/0012): verbatim time formulas, `/` origin omission, bad numeric fields ignored + warned, TODO-stub signal, numbered steps, variant labels, placeholder removal |
-| `tests/test_structure_files.py` (7) | Structure generation round-trip (tempfile fixtures only; `data_modularflavour/text/` never touched) |
-| `tests/test_report_extraction.py` (2) | Byte-equality of the extracted report helpers vs. the legacy inline methods |
+| `02_pdf_creation/tests/test_page_toc_helpers.py` (9) | TOC title cleaning, display parts, numbering depth, position-based nesting, depth caps (ADR 0014/0015) |
+| `02_pdf_creation/tests/test_recipe_parser.py` (10) | Tolerant multi-shape parsing (ADR 0001/0012): verbatim time formulas, `/` origin omission, bad numeric fields ignored + warned, TODO-stub signal, numbered steps, variant labels, placeholder removal |
+| `02_pdf_creation/tests/test_structure_files.py` (7) | Structure generation round-trip (tempfile fixtures only; `data_modularflavour/text/` never touched) |
+| `02_pdf_creation/tests/test_report_extraction.py` (2) | Byte-equality of the extracted report helpers vs. the legacy inline methods |
 
 Run: `python -m unittest discover -s tests` (28 tests). `pytest` is not
 installed in this environment, hence stdlib `unittest`.
@@ -30,7 +30,7 @@ installed in this environment, hence stdlib `unittest`.
   counting moved verbatim to `helpers/report_summary.py` (`summarize_diagnostics`)
   and the markdown rendering verbatim to `helpers/generation_report.py`
   (`render_report_markdown`). The old `_render_report_markdown` remains as a
-  thin alias for compatibility. `tests/test_report_extraction.py` proves the
+  thin alias for compatibility. `02_pdf_creation/tests/test_report_extraction.py` proves the
   extracted output is byte-identical to the legacy method, including pipe
   escaping and layout-tag exclusion.
 
@@ -67,5 +67,5 @@ installed in this environment, hence stdlib `unittest`.
   copy) was removed. It was tracked in git, so the removal is a reviewable
   working-tree change and the content stays recoverable from history; the
   true pre-refactor state remains commit `a082b85`.
-- `docs/CONTEXT.md` is ubiquitous language, not a file map, so the new helper
+- `02_pdf_creation/docs/CONTEXT.md` is ubiquitous language, not a file map, so the new helper
   modules are documented here instead.
