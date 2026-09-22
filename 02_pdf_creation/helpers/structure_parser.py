@@ -300,36 +300,4 @@ class StructureParser:
         """
         return iter_markdown_files(self.roots)
     
-def main():
-    """Test the structure parser."""
-    parser = StructureParser("data_modularflavour/text")
-    
-    print("Testing StructureParser...")
-    print(f"\nAll markdown files in directory:")
-    files = parser.get_all_markdown_files()
-    for f in sorted(files)[:10]:
-        print(f"  - {f}")
-    print(f"  ... ({len(files)} total)")
-    
-    print(f"\nParsing structure file:")
-    try:
-        files = parser.parse_structure_file("_-1.0. cookbook_structure_generated.md")
-        print(f"  Found {len(files)} files to process")
-        for f in files[:5]:
-            print(f"    - {f}")
-        print(f"    ...")
-    except Exception as e:
-        print(f"  Error: {e}")
-    
-    print(f"\nGetting hierarchy:")
-    try:
-        hierarchy = parser.get_structure_hierarchy("_-1.0. cookbook_structure_generated.md")
-        print(f"  Found {len(hierarchy)} sections")
-        for section in hierarchy[:3]:
-            print(f"    - {section['name']} ({len(section['children'])} children)")
-    except Exception as e:
-        print(f"  Error: {e}")
 
-
-if __name__ == "__main__":
-    main()

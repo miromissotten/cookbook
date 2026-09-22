@@ -319,16 +319,3 @@ class ContentPageRenderer:
         return template
 
 
-def render_content_page(title: str, content_html: str) -> str:
-    """Helper function to render a content page."""
-    renderer = ContentPageRenderer()
-    return renderer.render(title, content_html)
-
-
-if __name__ == "__main__":
-    # Test
-    html = render_content_page(
-        "Test Page",
-        "<h2>Test Content</h2><p>This is a test.</p>"
-    )
-    print(html[:500])

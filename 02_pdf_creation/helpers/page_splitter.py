@@ -1985,14 +1985,13 @@ def split_page_file(html_path: str) -> Optional[List[Tuple[str, str]]]:
     html = result["html"]
     token_count = html.count('<div data-page-footer')
     sheet_count = count_sheets(html)
+    diags: List[Tuple[str, str]] = []
     if token_count < sheet_count:
         html = _ensure_footer_tokens(html)
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)
         diags.append(("info", f"{name}: footer token re-injected into "
                               f"{sheet_count - token_count} continuation sheet(s)"))
-
-    diags: List[Tuple[str, str]] = []
     if kind == "recipe":
         diags.append(("vertical",
                       f"{name}: vertical layout elected ({sheets} sheet(s))"))
