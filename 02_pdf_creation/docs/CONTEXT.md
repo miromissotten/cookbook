@@ -191,7 +191,12 @@ _Avoid_: fit test (that is only the measurement half)
 ### Navigation
 
 **Wiki link**:
-A reference written in source markdown as `[[Page]]` or `[[Page|shown text]]`, pointing at another page of the book. A wiki link whose target page does not exist in the book renders as plain text and is reported.
+A reference written in source markdown as `[[Page]]` or `[[Page|shown text]]`,
+pointing at another page of the book. `[[Page]]` prints `Page` exactly as
+authored (without the wiki-link delimiters); `[[Page|shown text]]` prints
+`shown text`. The destination page's `### Title` never replaces the authored
+link text. A wiki link whose target page does not exist in the book follows the
+same text rule, renders as plain text, and is reported.
 _Avoid_: internal link (that is the printed artifact), hyperlink
 
 **Internal link**:

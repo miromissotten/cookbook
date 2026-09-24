@@ -170,6 +170,49 @@ class ContentPageRendering(unittest.TestCase):
         self.assertEqual(html.count('href="#page-miso"'), 2)
         self.assertNotIn("wiki-link-unresolved", html)
 
+    def test_unaliased_wikilinks_print_the_written_target_not_the_authored_title(self):
+        self.write_page(
+            "_5.1.1. target&name.md",
+            "### Text\nSee the linked page.\n\n"
+            "### Title\n- title: Miso\n",
+        )
+        self.gen._pre_scan_wiki_links(["_5.1.1. target&name.md"])
+
+        source = "[[_5.1.1. target&name#Preparation]]"
+        for convert in (self.gen.markdown_to_html,
+                        self.gen.process_wiki_links_html):
+            with self.subTest(convert=convert.__name__):
+                html = convert(source)
+                self.assertIn('href="#page-miso" class="wiki-link"', html)
+                self.assertIn(
+                    ">_5.1.1. target&amp;name#Preparation</a>", html)
+                self.assertNotIn(">Miso</a>", html)
+
+    def test_explicit_wikilink_nickname_controls_the_printed_text(self):
+        self.gen.register_wiki_link("_5.1.1. target_name", "page-miso")
+        source = "[[_5.1.1. target_name|fermented & paste]]"
+
+        for convert in (self.gen.markdown_to_html,
+                        self.gen.process_wiki_links_html):
+            with self.subTest(convert=convert.__name__):
+                html = convert(source)
+                self.assertIn('href="#page-miso" class="wiki-link"', html)
+                self.assertIn(">fermented &amp; paste</a>", html)
+                self.assertNotIn(">target_name</a>", html)
+
+    def test_unresolved_unaliased_wikilinks_keep_the_written_target(self):
+        source = "[[_9.9. missing_page-name&more]]"
+
+        for convert in (self.gen.markdown_to_html,
+                        self.gen.process_wiki_links_html):
+            with self.subTest(convert=convert.__name__):
+                html = convert(source, source_filename="chapter.md")
+                self.assertIn(
+                    '<span class="wiki-link-unresolved">'
+                    '_9.9. missing_page-name&amp;more</span>',
+                    html,
+                )
+
     def test_self_link_degrades_to_plain_text(self):
         content = ("### Text\nSee [[Miso]] for the whole picture.\n\n"
                    "### Title\n- title: Miso\n")

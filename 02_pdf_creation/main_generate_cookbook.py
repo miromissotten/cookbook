@@ -12,6 +12,7 @@ import tempfile
 import uuid
 from collections import defaultdict
 from datetime import datetime
+from html import escape
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 import io
@@ -154,7 +155,7 @@ class CookbookGenerator:
         
         # Wiki link reference to page ID mapping
         self.wiki_link_mapping = {}
-        # Wiki link reference to actual title mapping (for display text)
+        # Wiki link reference to authored title mapping (for title lookups)
         self.wiki_link_titles = {}
         
         # Cache for file contents and parsed recipes to avoid redundant work
@@ -425,15 +426,16 @@ class CookbookGenerator:
             table_text, self.RADAR_KIND, render_radar_png, self.RADAR_IMG_ALT,
             self.RADAR_IMG_STYLE)
     
-    def _resolve_wiki_page(self, page_ref: str) -> Tuple[str, Optional[str]]:
-        """Resolve a wiki-link page reference to (page_id, display_title).
+    def _resolve_wiki_page(
+            self, page_ref: str) -> Tuple[Optional[str], Optional[str]]:
+        """Resolve a wiki-link page reference to ``(page_id, authored_title)``.
 
         Args:
             page_ref: Raw reference from ``[[...]]``, e.g. '03_projects/kookboek/_2.2.1. Rice'.
 
         Returns:
-            A ``(page_id, display_title)`` tuple. ``display_title`` is ``None``
-            when the reference could not be resolved to any known page.
+            A ``(page_id, authored_title)`` tuple. ``authored_title`` is
+            ``None`` when the reference could not be resolved to a known page.
         """
         ref = page_ref.strip().lower()
         # Strip vault directory prefixes so refs like
@@ -450,7 +452,7 @@ class CookbookGenerator:
             # 1) Direct mapping / title hit
             if key in self.wiki_link_mapping:
                 return self.wiki_link_mapping[key], self.wiki_link_titles.get(key)
-            # 2) Via the display-title registry
+            # 2) Via the authored-title registry
             if key in self.wiki_link_titles:
                 title = self.wiki_link_titles[key]
                 pid = self.wiki_link_mapping.get(key) or self.wiki_link_mapping.get(title.lower())
@@ -479,17 +481,15 @@ class CookbookGenerator:
             display_text = None
 
         page_ref = page_ref.rstrip('\\]')
+        if display_text is None:
+            display_text = page_ref
+        display_text = escape(display_text)
 
-        page_id, actual_title = self._resolve_wiki_page(page_ref)
+        page_id, _ = self._resolve_wiki_page(page_ref)
 
         if page_id is None:
             self.unresolved_wiki_links[page_ref].add(source_filename or "<unknown source>")
-            if display_text is None:
-                display_text = page_ref.replace('_', ' ').replace('-', ' ').replace('/', ' / ')
             return f'<span class="wiki-link-unresolved">{display_text}</span>'
-
-        if display_text is None:
-            display_text = actual_title or page_ref.replace('_', ' ').replace('-', ' ')
 
         if current_page_id and page_id == current_page_id:
             return f'<span class="wiki-link-self">{display_text}</span>'
@@ -825,7 +825,7 @@ class CookbookGenerator:
                                 is_recipe: bool) -> str:
         """Register all identity variants for a page and return its page_id.
 
-        Both the display title and the filename stem are registered as
+        Both the authored title and the filename stem are registered as
         wiki-link keys, plus lowercased title variants (bare stem without
         leading underscore, stem stripped of leading numbering) so
         ``[[...]]`` references resolve regardless of how the author wrote
