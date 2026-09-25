@@ -213,6 +213,31 @@ class ContentPageRendering(unittest.TestCase):
                     html,
                 )
 
+    def test_recipe_link_to_ampersand_title_resolves_after_markdown_rendering(self):
+        self.write_page(
+            "_3.4.1. Deep & Savoury.md",
+            "### Text\nLink to this category.\n\n"
+            "### Title\n- title: Deep & Savoury\n",
+        )
+        self.gen._pre_scan_wiki_links(["_3.4.1. Deep & Savoury.md"])
+        source = (
+            "### Title\n- title: Bibimbap\n\n"
+            "### Ingredients\n- rice\n\n"
+            "### Instructions\n- Serve with "
+            "[[_3.4.1. Deep & Savoury|deep and bold sauce]].\n"
+        )
+
+        page_html, _ = self.gen.process_recipe_to_html(
+            "_1.2.2. Bibimbap.md", source)
+
+        self.assertIn(
+            '<a href="#page-deep--savoury" class="wiki-link">'
+            'deep and bold sauce</a>',
+            page_html,
+        )
+        self.assertNotIn("wiki-link-unresolved", page_html)
+        self.assertEqual(dict(self.gen.unresolved_wiki_links), {})
+
     def test_self_link_degrades_to_plain_text(self):
         content = ("### Text\nSee [[Miso]] for the whole picture.\n\n"
                    "### Title\n- title: Miso\n")
@@ -270,13 +295,31 @@ class ContentPageTitles(unittest.TestCase):
                 SIDEINFO_PAGE, "_5.2.2. list_Ramen Toppings.md"),
             "Miso")
 
-    def test_filename_derived_title_is_the_fallback(self):
-        # The leading "_" keeps reading as a space, exactly as the previous
-        # inline derivation did - hence the strip() in the expectation.
+    def test_filename_derived_title_is_the_unnumbered_fallback(self):
         self.assertEqual(
             self.gen._content_page_title(
-                METADATA_ONLY_PAGE, "_5.2.3. other lists.md").strip(),
-            "5.2.3. Other Lists")
+                METADATA_ONLY_PAGE, "_5.2.3. other lists.md"),
+            "Other Lists")
+
+    def test_missing_title_on_numbered_text_page_is_not_duplicated(self):
+        content = "### Text\nJust prose.\n"
+        filename = "_5.1.10. Sweet Potato.md"
+        page_title = self.gen._content_page_title(content, filename)
+        page_html, _ = self.gen.process_non_recipe_to_html(
+            filename, content, page_title)
+
+        self.assertEqual(page_title, "Sweet Potato")
+        self.assertIn(">5.1.10. Sweet Potato</h1>", page_html)
+        self.assertNotIn("5.1.10. 5.1.10.", page_html)
+        self.assertIn('id="page-sweet-potato"', page_html)
+
+    def test_legacy_numbered_fallback_keeps_an_unnumbered_anchor(self):
+        content = "### Text\nJust prose.\n"
+        page_html, _ = self.gen.process_non_recipe_to_html(
+            "_5.1.10. Sweet Potato.md", content, "5.1.10. Sweet Potato")
+
+        self.assertIn(">5.1.10. Sweet Potato</h1>", page_html)
+        self.assertIn('id="page-sweet-potato"', page_html)
 
     def test_unreadable_file_falls_back_without_raising(self):
         self.assertEqual(

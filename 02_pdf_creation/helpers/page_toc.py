@@ -6,9 +6,25 @@ in the same style as the recipe template.
 """
 
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import re
+
+from config import (
+    TAILWIND_COLORS,
+    A4_WIDTH_MM,
+    A4_HEIGHT_MM,
+    PAGE_PADDING,
+    PAGE_BOX_SHADOW,
+    PAGE_BG,
+    PAGE_SIZE,
+    FONT_HEADLINE,
+    FONT_BODY,
+    FONT_LABEL,
+    FONT_HEADLINE_STACK,
+    FONT_BODY_STACK,
+    FONT_LABEL_STACK,
+)
 
 # Whole-word tokens dropped from displayed TOC titles (never from the
 # source filenames themselves).
@@ -142,7 +158,7 @@ class TOCPageRenderer:
         pass
 
     def render(self, title: str, sections: List[Dict],
-               link_resolver=None) -> str:
+               link_resolver=None, page_id: Optional[str] = None) -> str:
         """
         Render a TOC page to HTML.
 
@@ -153,18 +169,22 @@ class TOCPageRenderer:
                 to a page anchor id; resolvable entries are emitted as
                 ``a.wiki-link`` anchors so they flow through the shared
                 internal-link mechanism (ADR 0004).
+            page_id: Optional explicit anchor id for the page heading. When
+                omitted the anchor derives from ``title`` via
+                ``clean_title_id``.
 
         Returns:
             Complete HTML page
         """
         toc_html = self._generate_toc_html(sections, link_resolver)
+        anchor = page_id if page_id is not None else ('page-' + clean_title_id(title))
 
         return self._get_html_template().format(
             title=title, toc_content=toc_html,
-            clean_title_id=clean_title_id(title))
+            clean_title_id=anchor)
 
     def render_full_toc(self, title: str, sections: List[Dict],
-                        link_resolver=None) -> str:
+                        link_resolver=None, page_id: Optional[str] = None) -> str:
         """Render an uncapped TOC page to HTML.
 
         Like ``render`` but shows every entry regardless of numbering depth,
@@ -177,20 +197,20 @@ class TOCPageRenderer:
             section_name = section.get("name", "Untitled")
             if _numbering_depth(section_name) > FULL_TOC_MAX_DEPTH:
                 continue
-            # Include the section itself so its header renders in the hierarchy
-            # at depth 1; nest_entries_by_position handles all descendants.
             nested = nest_entries_by_position([section])
             self._append_hierarchy_rows(html_parts, nested, link_resolver,
                                         FULL_TOC_MAX_DEPTH)
         html_parts.append('</div>')
         toc_html = "\n".join(html_parts)
+        anchor = page_id if page_id is not None else ('page-' + clean_title_id(title))
         return self._get_html_template().format(
             title=title, toc_content=toc_html,
-            clean_title_id=clean_title_id(title))
+            clean_title_id=anchor)
 
     def render_chapter(self, title: str, subtree: Dict,
                        content_html: str = '', link_resolver=None,
-                       max_depth: int = CHAPTER_TOC_MAX_DEPTH) -> List[str]:
+                       max_depth: int = CHAPTER_TOC_MAX_DEPTH,
+                       page_id: Optional[str] = None) -> List[str]:
         """
         Render a chapter block as separate sheets, text before the sub-TOC
         (ADR 0015):
@@ -207,51 +227,66 @@ class TOCPageRenderer:
             content_html: Optional pre-rendered chapter intro prose
             link_resolver: Same contract as ``render``
             max_depth: Deepest numbering level shown (default 5: x.x.x.x.x)
+            page_id: Optional explicit anchor id for the page heading. When
+                omitted the anchor derives from ``title`` via
+                ``clean_title_id``.
 
         Returns:
             List of HTML pages (1 or 2 elements, see the shapes above)
         """
-        # Text-only chapter (ADR 0026): its entries print on the pages right
-        # after the prose, so the prose sheet is the whole block.
+        anchor = page_id if page_id is not None else ('page-' + clean_title_id(title))
         if not chapter_prints_subtoc(subtree):
-            return [self._build_chapter_intro_page(title, content_html or '')]
+            return [self._build_chapter_intro_page(title, content_html or '', page_anchor=anchor)]
 
         pages: List[str] = []
 
-        # Page 1: Intro prose (only if there's content). The chapter text
-        # opens the block so it can start on an even (left) page (ADR 0015).
         if content_html and content_html.strip():
-            pages.append(self._build_chapter_intro_page(title, content_html))
+            pages.append(self._build_chapter_intro_page(title, content_html, page_anchor=anchor))
 
-        # Page 2: Chapter Title + Sub-TOC (opens the right-hand page)
         toc_html = self._generate_chapter_tree_html(
             subtree, link_resolver, max_depth)
-        pages.append(self._build_toc_page(title, toc_html))
+        pages.append(self._build_toc_page(title, toc_html, page_anchor=anchor))
 
         return pages
 
-    def _build_toc_page(self, title: str, toc_html: str) -> str:
+    def _build_toc_page(self, title: str, toc_html: str, page_anchor: Optional[str] = None) -> str:
         """Build a standalone TOC page with chapter title."""
+        anchor = page_anchor if page_anchor is not None else ('page-' + clean_title_id(title))
         return self._get_html_template().format(
             title=title, toc_content=toc_html,
-            clean_title_id=clean_title_id(title))
+            clean_title_id=anchor)
 
-    def _build_chapter_intro_page(self, title: str, content_html: str) -> str:
+    def _build_chapter_intro_page(self, title: str, content_html: str, page_anchor: Optional[str] = None) -> str:
         """Build a standalone intro prose page.
 
         The prose lives in a ``.content-text`` container so the splitter
         (ADR 0002) sees every paragraph as a flowable unit and rebuilds an
         overflowing intro onto continuation sheets instead of clipping it
-        (ADR 0015). Interpolated directly (no ``str.format``) because
-        markdown content may contain braces.
+        (ADR 0015). Color and geometry placeholders are resolved via
+        ``str.replace`` first so that braces in markdown content cannot
+        interfere with ``str.format``.
         """
         intro_content = (
             '<div class="chapter-intro-standalone content-text">'
             f'{content_html}</div>'
         )
-        return self._get_html_template().format(
+        template = self._get_html_template()
+        for placeholder, value in TAILWIND_COLORS.items():
+            template = template.replace("{" + placeholder + "}", value)
+        template = (template
+                    .replace("{A4_WIDTH_MM}", str(A4_WIDTH_MM))
+                    .replace("{A4_HEIGHT_MM}", str(A4_HEIGHT_MM))
+                    .replace("{PAGE_PADDING}", PAGE_PADDING)
+                    .replace("{PAGE_BOX_SHADOW}", PAGE_BOX_SHADOW)
+                    .replace("{PAGE_BG}", PAGE_BG)
+                    .replace("{PAGE_SIZE}", PAGE_SIZE)
+                    .replace("{FONT_HEADLINE}", FONT_HEADLINE)
+                    .replace("{FONT_BODY}", FONT_BODY)
+                    .replace("{FONT_LABEL}", FONT_LABEL))
+        anchor = page_anchor if page_anchor is not None else ('page-' + clean_title_id(title))
+        return template.format(
             title=title, toc_content=intro_content,
-            clean_title_id=clean_title_id(title))
+            clean_title_id=anchor)
 
     def _entry_link(self, name: str, link_resolver) -> Tuple[str, Optional[str]]:
         """Return (inner HTML, target page id) for one TOC entry name.
@@ -629,7 +664,7 @@ class TOCPageRenderer:
     <!-- Header Section -->
     <div class="flex justify-between items-start mb-6">
         <div class="flex-grow">
-            <h1 class="font-headline font-extrabold text-[3rem] leading-none tracking-tighter text-on-surface mb-3" id="page-{clean_title_id}">{title}</h1>
+            <h1 class="font-headline font-extrabold text-[3rem] leading-none tracking-tighter text-on-surface mb-3" id="{clean_title_id}">{title}</h1>
                         <svg class="toc-title-underline" viewBox="0 0 1200 24"
                              preserveAspectRatio="none" style="width:100%; height:24px;">
               <line x1="4" y1="14" x2="1196" y2="14"

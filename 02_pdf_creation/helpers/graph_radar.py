@@ -17,28 +17,26 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
-# Book palette, same values the sheet templates and graph_scatterplot use.
-_PAGE = "#ffffff"
-_PANEL = "#f1f4f2"
-_PRIMARY = "#47664a"
-_FILL = "#d7e8cd"
-_ON_SURFACE = "#2d3432"
-_GRID = "#acb4b1"
+from config import (
+    COLOR_ON_SURFACE,
+    COLOR_OUTLINE_VARIANT,
+    COLOR_PRIMARY,
+    COLOR_SECONDARY_FIXED,
+    COLOR_SURFACE_CONTAINER_LOW,
+    COLOR_WHITE,
+    RADAR_RADIAL_LIMIT,
+    RADAR_PRINT_WIDTH_MM,
+    RADAR_PRINT_WIDTH_INCHES,
+    RADAR_LABEL_FONT_PT,
+    RADAR_LINE_WIDTH,
+    RADAR_DPI,
+)
 
-# The taste axes are rated 0-5 in the sources (see the SauceCategorisation
-# annex): the chart's centre is 0 and its rim is this value.
-_RADIAL_LIMIT = 5
-# Printed width of the chart on the page. The generator sizes the <img> with
-# this value and the figure is drawn to match it, so a font size here means the
-# same thing on paper instead of being silently shrunk by the CSS.
-PRINT_WIDTH_MM = 40
-_PRINT_WIDTH_INCHES = PRINT_WIDTH_MM / 25.4
-# Axis names are sized for this printed width: at 8pt they stay comfortably
-# legible at 40mm, and drawing at print size is what keeps this true.
-_LABEL_FONT_PT = 8
-_LINE_WIDTH = 1.5
-_DOTS_PER_INCH = 300
-# Alignment row of a markdown pipe-table (``| ---- | :--: |``).
+# Public alias kept so main_generate_cookbook.py can continue importing
+# PRINT_WIDTH_MM from this module without knowing about config.py.
+PRINT_WIDTH_MM = RADAR_PRINT_WIDTH_MM
+
+
 _SEPARATOR_RE = re.compile(r'^\|[\s\-:|]+\|$')
 
 
@@ -105,14 +103,14 @@ def render_radar_png(table_text: str, output_path: str,
 
     # Authored ratings above the standard 0-5 scale still print in full instead
     # of running off the rim.
-    limit = max(_RADIAL_LIMIT, math.ceil(max(values)))
+    limit = max(RADAR_RADIAL_LIMIT, math.ceil(max(values)))
 
     # Close the polygon by repeating the first point, so the outline joins up.
     angles = [2 * math.pi * index / len(labels) for index in range(len(labels))]
     closed_angles = angles + angles[:1]
     closed_values = values + values[:1]
 
-    fig, ax = plt.subplots(figsize=(_PRINT_WIDTH_INCHES, _PRINT_WIDTH_INCHES),
+    fig, ax = plt.subplots(figsize=(RADAR_PRINT_WIDTH_INCHES, RADAR_PRINT_WIDTH_INCHES),
                            subplot_kw={'projection': 'polar'})
     ax.set_theta_offset(math.pi / 2)
     ax.set_theta_direction(-1)
@@ -120,18 +118,18 @@ def render_radar_png(table_text: str, output_path: str,
     ax.set_yticks(range(1, limit + 1))
     ax.set_yticklabels([])  # The rings give scale, not numbers to read off.
     ax.set_xticks(angles)
-    ax.set_xticklabels(labels, fontsize=_LABEL_FONT_PT, color=_ON_SURFACE)
-    ax.plot(closed_angles, closed_values, color=_PRIMARY, linewidth=_LINE_WIDTH)
-    ax.fill(closed_angles, closed_values, color=_FILL)
-    ax.grid(True, color=_GRID, alpha=0.6)
-    ax.set_facecolor(_PANEL)
-    ax.spines['polar'].set_color(_GRID)
-    fig.patch.set_facecolor(_PAGE)
+    ax.set_xticklabels(labels, fontsize=RADAR_LABEL_FONT_PT, color=COLOR_ON_SURFACE)
+    ax.plot(closed_angles, closed_values, color=COLOR_PRIMARY, linewidth=RADAR_LINE_WIDTH)
+    ax.fill(closed_angles, closed_values, color=COLOR_SECONDARY_FIXED)
+    ax.grid(True, color=COLOR_OUTLINE_VARIANT, alpha=0.6)
+    ax.set_facecolor(COLOR_SURFACE_CONTAINER_LOW)
+    ax.spines['polar'].set_color(COLOR_OUTLINE_VARIANT)
+    fig.patch.set_facecolor(COLOR_WHITE)
 
     plt.tight_layout()
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(output_path, dpi=_DOTS_PER_INCH, bbox_inches='tight',
-                facecolor=_PAGE)
+    plt.savefig(output_path, dpi=RADAR_DPI, bbox_inches='tight',
+                facecolor=COLOR_WHITE)
     plt.close(fig)
 
     return Path(output_path).resolve().as_uri()

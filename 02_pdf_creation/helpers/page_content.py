@@ -6,17 +6,46 @@ This module provides HTML templates for non-recipe content pages
 in the same style as the recipe template.
 """
 
-from typing import Optional
+from typing import Any, Optional
+
+from config import (
+    TAILWIND_COLORS,
+    A4_WIDTH_MM,
+    A4_HEIGHT_MM,
+    PAGE_PADDING,
+    PAGE_BOX_SHADOW,
+    PAGE_BG,
+    PAGE_SIZE,
+    FONT_HEADLINE,
+    FONT_BODY,
+    FONT_LABEL,
+)
 
 from page_toc import clean_title_id
 
 
 class ContentPageRenderer:
     """Render content pages into HTML using the same A4 recipe template style."""
-    
+
     def __init__(self):
         pass
-    
+
+    @staticmethod
+    def _apply_colors(template: str) -> str:
+        """Replace color/geometry placeholders with centralized config values."""
+        for placeholder, value in TAILWIND_COLORS.items():
+            template = template.replace("{" + placeholder + "}", value)
+        return (template
+                .replace("{A4_WIDTH_MM}", str(A4_WIDTH_MM))
+                .replace("{A4_HEIGHT_MM}", str(A4_HEIGHT_MM))
+                .replace("{PAGE_PADDING}", PAGE_PADDING)
+                .replace("{PAGE_BOX_SHADOW}", PAGE_BOX_SHADOW)
+                .replace("{PAGE_BG}", PAGE_BG)
+                .replace("{PAGE_SIZE}", PAGE_SIZE)
+                .replace("{FONT_HEADLINE}", FONT_HEADLINE)
+                .replace("{FONT_BODY}", FONT_BODY)
+                .replace("{FONT_LABEL}", FONT_LABEL))
+
     def render(self, title: str, content_html: str,
                page_id: Optional[str] = None) -> str:
         """
@@ -42,7 +71,7 @@ class ContentPageRenderer:
         template = template.replace('{title}', title)
         template = template.replace('{page_anchor}', page_anchor)
         template = template.replace('{content}', content_html)
-        return template
+        return self._apply_colors(template)
     
     def _get_html_template(self) -> str:
         """Get the HTML template for content pages."""
@@ -63,32 +92,32 @@ class ContentPageRenderer:
         theme: {
             extend: {
                 "colors": {
-                    "surface-container-low": "#f1f4f2",
-                    "on-secondary": "#edfee2",
-                    "primary": "#47664a",
-                    "secondary-fixed-dim": "#c9dabf",
-                    "on-surface-variant": "#59615f",
-                    "secondary-fixed": "#d7e8cd",
-                    "inverse-on-surface": "#9b9d9c",
-                    "secondary-container": "#d7e8cd",
-                    "surface": "#ffffff",
-                    "on-error": "#fff7f6",
-                    "on-error-container": "#6e1400",
-                    "surface-container-lowest": "#ffffff",
-                    "outline": "#757c7a",
-                    "background": "#ffffff",
-                    "tertiary": "#5a6331",
-                    "surface-variant": "#dde4e1",
-                    "outline-variant": "#acb4b1",
-                    "on-surface": "#2d3432",
-                    "surface-container": "#eaefec",
-                    "on-primary": "#e9ffe6",
-                    "secondary": "#54634e"
+                    "surface-container-low": "{COLOR_SURFACE_CONTAINER_LOW}",
+                    "on-secondary": "{COLOR_ON_SECONDARY}",
+                    "primary": "{COLOR_PRIMARY}",
+                    "secondary-fixed-dim": "{COLOR_SECONDARY_FIXED_DIM}",
+                    "on-surface-variant": "{COLOR_ON_SURFACE_VARIANT}",
+                    "secondary-fixed": "{COLOR_SECONDARY_FIXED}",
+                    "inverse-on-surface": "{COLOR_INVERSE_ON_SURFACE}",
+                    "secondary-container": "{COLOR_SECONDARY_CONTAINER}",
+                    "surface": "{COLOR_SURFACE}",
+                    "on-error": "{COLOR_ON_ERROR}",
+                    "on-error-container": "{COLOR_ON_ERROR_CONTAINER}",
+                    "surface-container-lowest": "{COLOR_SURFACE_CONTAINER_LOWEST}",
+                    "outline": "{COLOR_OUTLINE}",
+                    "background": "{COLOR_BACKGROUND}",
+                    "tertiary": "{COLOR_TERTIARY}",
+                    "surface-variant": "{COLOR_SURFACE_VARIANT}",
+                    "outline-variant": "{COLOR_OUTLINE_VARIANT}",
+                    "on-surface": "{COLOR_ON_SURFACE}",
+                    "surface-container": "{COLOR_SURFACE_CONTAINER}",
+                    "on-primary": "{COLOR_ON_PRIMARY}",
+                    "secondary": "{COLOR_SECONDARY}"
                 },
                 "fontFamily": {
-                    "headline": ["Manrope", "sans-serif"],
-                    "body": ["Work Sans", "sans-serif"],
-                    "label": ["Plus Jakarta Sans", "sans-serif"]
+                    "headline": ["{FONT_HEADLINE}", "sans-serif"],
+                    "body": ["{FONT_BODY}", "sans-serif"],
+                    "label": ["{FONT_LABEL}", "sans-serif"]
                 }
             }
         }
@@ -112,12 +141,12 @@ class ContentPageRenderer:
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
     .recipe-page {
-        width: 210mm;
-        height: 297mm;
-        padding: 25mm 15mm 15mm 25mm; /* Top 25, Right 15, Bottom 15, Left 25 (= 15 base + 10mm book gutter) */
-        box-sizing: border-box;
-        background: #ffffff;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+width: {A4_WIDTH_MM}mm;
+                height: {A4_HEIGHT_MM}mm;
+                padding: {PAGE_PADDING};
+                box-sizing: border-box;
+                background: {PAGE_BG};
+                box-shadow: {PAGE_BOX_SHADOW};
         position: relative;
         isolation: isolate;
         overflow: hidden;
@@ -125,7 +154,7 @@ class ContentPageRenderer:
         flex-direction: column;
     }
     @page {
-        size: A4;
+        size: {PAGE_SIZE};
         margin: 0;
     }
     @media print {
@@ -155,7 +184,7 @@ class ContentPageRenderer:
         font-family: 'Work Sans', sans-serif;
         font-size: 0.9rem;
         line-height: 1.6;
-        color: #2d3432;
+        color: {COLOR_ON_SURFACE};
     }
     .content-text h1 {
         font-family: 'Manrope', sans-serif;
@@ -163,7 +192,7 @@ class ContentPageRenderer:
         font-weight: 700;
         margin-bottom: 1rem;
         margin-top: 1.5rem;
-        color: #2d3432;
+        color: {COLOR_ON_SURFACE};
         letter-spacing: -0.02em;
     }
     .content-text h2 {
@@ -174,7 +203,7 @@ class ContentPageRenderer:
         letter-spacing: 0.15em;
         margin-bottom: 0.75rem;
         margin-top: 1.25rem;
-        color: #2d3432;
+        color: {COLOR_ON_SURFACE};
         border-bottom: 2px solid rgba(71, 102, 74, 0.3);
         padding-bottom: 0.25rem;
     }
@@ -184,7 +213,7 @@ class ContentPageRenderer:
         font-weight: 700;
         margin-bottom: 0.5rem;
         margin-top: 1rem;
-        color: #59615f;
+        color: {COLOR_ON_SURFACE_VARIANT};
     }
     .content-text h4 {
         font-family: 'Manrope', sans-serif;
@@ -192,14 +221,14 @@ class ContentPageRenderer:
         font-weight: 600;
         margin-bottom: 0.35rem;
         margin-top: 0.75rem;
-        color: #47664a;
+        color: {COLOR_PRIMARY};
         display: inline-block;
         border-bottom: 2px solid rgba(71, 102, 74, 0.4);
         padding-bottom: 0.125rem;
     }
     .content-text p {
         margin-bottom: 0.75rem;
-        color: #59615f;
+        color: {COLOR_ON_SURFACE_VARIANT};
     }
     .content-text ul {
         margin-left: 1.5rem;
@@ -216,16 +245,16 @@ class ContentPageRenderer:
     .content-text li {
         display: list-item;
         margin-bottom: 0.25rem;
-        color: #59615f;
+        color: {COLOR_ON_SURFACE_VARIANT};
         font-family: 'Plus Jakarta Sans', sans-serif;
         font-size: 0.85rem;
     }
     .content-text code {
-        background: #f1f4f2;
+        background: {COLOR_SURFACE_CONTAINER_LOW};
         padding: 0.125rem 0.25rem;
         border-radius: 0.25rem;
         font-size: 0.85em;
-        color: #47664a;
+        color: {COLOR_PRIMARY};
     }
     /* Markdown blockquotes (pull quotes, callouts). Tailwind's preflight
        resets blockquote margins to zero, so an unstyled quote prints as a
@@ -235,7 +264,7 @@ class ContentPageRenderer:
         padding: 0.2rem 0 0.2rem 0.9rem;
         border-left: 2.5pt solid rgba(71, 102, 74, 0.55);
         font-style: italic;
-        color: #59615f;
+        color: {COLOR_ON_SURFACE_VARIANT};
         break-inside: avoid;
         page-break-inside: avoid;
     }
@@ -255,7 +284,7 @@ class ContentPageRenderer:
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        color: #59615f;
+        color: {COLOR_ON_SURFACE_VARIANT};
         border-bottom: 0.5pt solid rgba(71, 102, 74, 0.4);
         opacity: 0.8;
         text-align: left;
@@ -266,10 +295,10 @@ class ContentPageRenderer:
         font-family: 'Work Sans', sans-serif;
         font-size: 0.75rem;
         line-height: 1.35;
-        color: #59615f;
+        color: {COLOR_ON_SURFACE_VARIANT};
     }
     .content-text table tbody tr:nth-child(even) td {
-        background-color: #f1f4f2;
+        background-color: {COLOR_SURFACE_CONTAINER_LOW};
     }
     /* First column cells wrap like every other cell (ADR 0024): forcing
        them onto one line (width:1% + nowrap) pushed wide first columns -
@@ -287,7 +316,7 @@ class ContentPageRenderer:
     .mermaid-diagram {
         margin: 1rem 0;
         padding: 1rem;
-        background: #f1f4f2;
+        background: {COLOR_SURFACE_CONTAINER_LOW};
         border-radius: 0.5rem;
         overflow-x: auto;
     }

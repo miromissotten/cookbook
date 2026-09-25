@@ -40,26 +40,25 @@ from reportlab.lib.units import mm
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
-from config import PAGE_NUMBER_X_POSITION
-
-# CSS px -> PDF points. Sheets render at 96 dpi (794x1123 px viewport) and
-# print at exact A4, so the factor is the plain 72/96 device ratio.
-PX_TO_PT = 72.0 / 96.0
-PAGE_W_PT = 210 / 25.4 * 72   # 595.28 pt (A4)
-PAGE_H_PT = 297 / 25.4 * 72   # 841.89 pt (A4)
-
-ACCENT_RGB = (71 / 255, 102 / 255, 74 / 255)   # #47664a - footer band green
-INK_RGB = (45 / 255, 52 / 255, 50 / 255)       # #2d3432 - footer label ink
+from config import (
+    PAGE_NUMBER_X_POSITION,
+    PAGE_W_PT,
+    PAGE_H_PT,
+    PX_TO_PT,
+    ACCENT_RGB,
+    INK_RGB,
+    BACK_TO_TOC_LABEL,
+    BACK_TO_TOC_FONT,
+    BACK_TO_TOC_FONT_SIZE,
+    BACK_TO_TOC_BASELINE_MM,
+)
 
 # Digital-variant footer link (ADR 0004 amendment): "back to table of
 # contents" printed in the footer band's empty right-hand slot, directly
 # below the page number (which sits at 11 mm, on the label row above the
 # band's green rule). Baseline lives in the ~2 mm gap between that rule
 # and the solid green bar at the very bottom edge.
-BACK_TO_TOC_LABEL = "back to table of contents"
-BACK_TO_TOC_FONT = "Helvetica"
-BACK_TO_TOC_FONT_SIZE = 7
-BACK_TO_TOC_BASELINE_MM = 5.8
+BACK_TO_TOC_LABEL
 
 # Page-container classes used by both sheet templates (see
 # html_to_pdf.combine_html_files, which extracts exactly these).

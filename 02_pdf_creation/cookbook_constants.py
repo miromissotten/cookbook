@@ -1,4 +1,11 @@
 import re
+
+from config import (
+    WATERMARK_COLOR_RGBA,
+    WATERMARK_FONT_SIZE_REM,
+    WATERMARK_FONT_FAMILY,
+)
+
 from helpers.graph_radar import PRINT_WIDTH_MM
 
 _WIKI_LINK_RE = re.compile(r'(?<!!)\[\[([^\]|]+(?:\|[^\]]+)?)\]\]')
@@ -15,20 +22,20 @@ RADAR_IMG_ALT = 'Radar chart of the flavour profile'
 _LOVE_HEART_SIZE_MM = 6
 _LOVE_HEART_OPTICAL_OFFSET_PT = 3
 
-_WATERMARK_CSS = """\
-.notdone-watermark::after {
+_WATERMARK_CSS = f"""\
+.notdone-watermark::after {{
     content: "miró not happy yet";
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(-45deg);
-    color: rgba(220, 38, 38, 0.18);
-    font-family: 'Manrope', 'Work Sans', 'Plus Jakarta Sans', Arial, sans-serif;
-    font-size: 7rem;
+    color: {WATERMARK_COLOR_RGBA};
+    font-family: {WATERMARK_FONT_FAMILY};
+    font-size: {WATERMARK_FONT_SIZE_REM}rem;
     font-weight: 700;
     white-space: nowrap;
     pointer-events: none;
     z-index: 50;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-}"""
+}}"""

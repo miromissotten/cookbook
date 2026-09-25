@@ -14,14 +14,10 @@ staying silent.
 from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Union
 
+from config import DEFAULT_INPUT_ROOTS
+
 # A single directory, or an ordered sequence of directories.
 PathSpec = Union[str, Path, Sequence[Union[str, Path]]]
-
-# Default search order: finished sources win over work-in-progress ones.
-DEFAULT_INPUT_DIRS: Sequence[str] = (
-    "data_modularflavour/text",
-    "data_modularflavour/text_notdone",
-)
 
 
 def resolve_roots(spec: Optional[PathSpec] = None) -> List[Path]:
@@ -37,7 +33,7 @@ def resolve_roots(spec: Optional[PathSpec] = None) -> List[Path]:
         semantics; individual lookups simply skip missing roots.
     """
     if spec is None:
-        paths: List[Path] = [Path(p) for p in DEFAULT_INPUT_DIRS]
+        paths: List[Path] = [Path(p) for p in DEFAULT_INPUT_ROOTS]
     elif isinstance(spec, (str, Path)):
         paths = [Path(spec)]
     else:

@@ -1,16 +1,18 @@
 import os
 from pathlib import Path
 
+from config import BUILD_LOCK_FILENAME, BUILD_LOCK_STALE_HOURS
+
 from helpers.console_logging import warn
 
 
 def acquire_build_lock(exports_dir: Path) -> tuple:
     import time
-    lock_path = exports_dir / ".build.lock"
+    lock_path = exports_dir / BUILD_LOCK_FILENAME
     try:
         if lock_path.exists():
             age_h = (time.time() - lock_path.stat().st_mtime) / 3600
-            if age_h < 2:
+            if age_h < BUILD_LOCK_STALE_HOURS:
                 print(
                     "ERROR: another cookbook build appears to be running "
                     f"(lock: {lock_path}, {age_h * 60:.0f} min old). "

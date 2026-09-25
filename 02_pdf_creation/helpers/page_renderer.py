@@ -6,9 +6,23 @@ import html
 import markdown
 import re
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-from config import ICON_MAPPING, VARIANT_LABEL_MAX_WORDS
+from config import (
+    ICON_MAPPING,
+    ICON_DIR,
+    VARIANT_LABEL_MAX_WORDS,
+    TAILWIND_COLORS,
+    A4_WIDTH_MM,
+    A4_HEIGHT_MM,
+    PAGE_PADDING,
+    PAGE_BOX_SHADOW,
+    PAGE_BG,
+    PAGE_SIZE,
+    FONT_HEADLINE,
+    FONT_BODY,
+    FONT_LABEL,
+)
 
 
 class RecipeParser:
@@ -456,7 +470,23 @@ class RecipeRenderer:
             'medium': ['icon_difficulty_2.png'],
             'hard': ['icon_difficulty_3.png'],
         }
-    
+
+    @staticmethod
+    def _format_template(template: str, **extra: Dict[str, Any]) -> str:
+        """Format an HTML template, injecting centralized colors and geometry."""
+        return template.format(
+            **TAILWIND_COLORS,
+            A4_WIDTH_MM=A4_WIDTH_MM,
+            A4_HEIGHT_MM=A4_HEIGHT_MM,
+            PAGE_PADDING=PAGE_PADDING,
+            PAGE_BOX_SHADOW=PAGE_BOX_SHADOW,
+            PAGE_BG=PAGE_BG,
+            PAGE_SIZE=PAGE_SIZE,
+            FONT_HEADLINE=FONT_HEADLINE,
+            FONT_BODY=FONT_BODY,
+            FONT_LABEL=FONT_LABEL,
+            **extra)
+
     def render_html(self, recipe: Dict, position_label: str = '',
                     radar_img_html: str = '') -> str:
         """Render recipe data into HTML string.
@@ -518,7 +548,8 @@ class RecipeRenderer:
         # Prepend position label to title for display (e.g., "1.1.1. Ramen")
         display_title = f"{position_label} {recipe.get('title', 'Untitled Recipe')}" if position_label else recipe.get('title', 'Untitled Recipe')
 
-        html_content = html_template.format(
+        html_content = self._format_template(
+            html_template,
             title=display_title,
             clean_title_id=clean_title,
             origin_block=origin_html,
@@ -633,7 +664,7 @@ class RecipeRenderer:
         """Get icon as file path or data URI for PDF compatibility."""
         # Try to find the icon file
         search_paths = [
-            Path("data_modularflavour/icon") / icon_name,
+            Path(ICON_DIR) / icon_name,
             Path(icon_name),
         ]
         
@@ -1164,32 +1195,32 @@ class RecipeRenderer:
         theme: {{
             extend: {{
                 "colors": {{
-                    "surface-container-low": "#f1f4f2",
-                    "on-secondary": "#edfee2",
-                    "primary": "#47664a",
-                    "secondary-fixed-dim": "#c9dabf",
-                    "on-surface-variant": "#59615f",
-                    "secondary-fixed": "#d7e8cd",
-                    "inverse-on-surface": "#9b9d9c",
-                    "secondary-container": "#d7e8cd",
-                    "surface": "#ffffff",
-                    "on-error": "#fff7f6",
-                    "on-error-container": "#6e1400",
-                    "surface-container-lowest": "#ffffff",
-                    "outline": "#757c7a",
-                    "background": "#ffffff",
-                    "tertiary": "#5a6331",
-                    "surface-variant": "#dde4e1",
-                    "outline-variant": "#acb4b1",
-                    "on-surface": "#2d3432",
-                    "surface-container": "#eaefec",
-                    "on-primary": "#e9ffe6",
-                    "secondary": "#54634e"
+                    "surface-container-low": "{COLOR_SURFACE_CONTAINER_LOW}",
+                    "on-secondary": "{COLOR_ON_SECONDARY}",
+                    "primary": "{COLOR_PRIMARY}",
+                    "secondary-fixed-dim": "{COLOR_SECONDARY_FIXED_DIM}",
+                    "on-surface-variant": "{COLOR_ON_SURFACE_VARIANT}",
+                    "secondary-fixed": "{COLOR_SECONDARY_FIXED}",
+                    "inverse-on-surface": "{COLOR_INVERSE_ON_SURFACE}",
+                    "secondary-container": "{COLOR_SECONDARY_CONTAINER}",
+                    "surface": "{COLOR_SURFACE}",
+                    "on-error": "{COLOR_ON_ERROR}",
+                    "on-error-container": "{COLOR_ON_ERROR_CONTAINER}",
+                    "surface-container-lowest": "{COLOR_SURFACE_CONTAINER_LOWEST}",
+                    "outline": "{COLOR_OUTLINE}",
+                    "background": "{COLOR_BACKGROUND}",
+                    "tertiary": "{COLOR_TERTIARY}",
+                    "surface-variant": "{COLOR_SURFACE_VARIANT}",
+                    "outline-variant": "{COLOR_OUTLINE_VARIANT}",
+                    "on-surface": "{COLOR_ON_SURFACE}",
+                    "surface-container": "{COLOR_SURFACE_CONTAINER}",
+                    "on-primary": "{COLOR_ON_PRIMARY}",
+                    "secondary": "{COLOR_SECONDARY}"
                 }},
                 "fontFamily": {{
-                    "headline": ["Manrope", "sans-serif"],
-                    "body": ["Work Sans", "sans-serif"],
-                    "label": ["Plus Jakarta Sans", "sans-serif"]
+                    "headline": ["{FONT_HEADLINE}", "sans-serif"],
+                    "body": ["{FONT_BODY}", "sans-serif"],
+                    "label": ["{FONT_LABEL}", "sans-serif"]
                 }}
             }}
         }}
@@ -1199,23 +1230,23 @@ class RecipeRenderer:
     .material-symbols-outlined {{
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }}
-    .recipe-page {{
-        width: 210mm;
-        height: 297mm;
-        padding: 25mm 15mm 15mm 25mm; /* Top 25, Right 15, Bottom 15, Left 25 (= 15 base + 10mm book gutter) */
-        box-sizing: border-box;
-        background: #ffffff;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
-        position: relative;
-        isolation: isolate;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }}
-    @page {{
-        size: A4;
-        margin: 0;
-    }}
+.recipe-page {{
+                width: {A4_WIDTH_MM}mm;
+                height: {A4_HEIGHT_MM}mm;
+                padding: {PAGE_PADDING}; /* Top 25, Right 15, Bottom 15, Left 25 (= 15 base + 10mm book gutter) */
+                box-sizing: border-box;
+                background: {PAGE_BG};
+                box-shadow: {PAGE_BOX_SHADOW};
+                position: relative;
+                isolation: isolate;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }}
+            @page {{
+                size: {PAGE_SIZE};
+                margin: 0;
+            }}
     @media print {{
         html, body {{
             margin: 0;
@@ -1245,7 +1276,7 @@ class RecipeRenderer:
         font-size: 0.7rem;
         text-transform: uppercase;
         letter-spacing: 0.15em;
-        color: #2d3432;
+        color: {COLOR_ON_SURFACE};
         border-bottom: 2px solid rgba(71, 102, 74, 0.3);
         display: inline-block;
         margin-bottom: 0.5rem;
@@ -1257,13 +1288,13 @@ class RecipeRenderer:
         margin-bottom: 0.15rem;
         font-size: 0.8rem;
         font-family: 'Plus Jakarta Sans', sans-serif;
-        color: #59615f;
+        color: {COLOR_ON_SURFACE_VARIANT};
     }}
     .ingredient-list li::before {{
         content: '•';
         position: absolute;
         left: 0;
-        color: #47664a;
+        color: {COLOR_PRIMARY};
         font-weight: bold;
     }}
     .avoid-break {{
@@ -1294,12 +1325,12 @@ class RecipeRenderer:
         left: 0;
         top: 0;
         bottom: 0.4rem;
-        border-left: 2px solid #c9dabf; /* secondary-fixed-dim */
+        border-left: 2px solid {COLOR_SECONDARY_FIXED_DIM}; /* secondary-fixed-dim */
     }}
     .mermaid-diagram {{
         margin: 1rem 0;
         padding: 1rem;
-        background: #f1f4f2;
+        background: {COLOR_SURFACE_CONTAINER_LOW};
         border-radius: 0.5rem;
         overflow-x: auto;
         break-inside: avoid;
@@ -1314,7 +1345,7 @@ class RecipeRenderer:
         width: 100%;
         border-collapse: collapse;
         font-size: 0.75rem;
-        color: #59615f;
+        color: {COLOR_ON_SURFACE_VARIANT};
         margin-top: 0.5rem;
         margin-bottom: 0.75rem;
         break-inside: avoid;
@@ -1325,8 +1356,8 @@ class RecipeRenderer:
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.12em;
-        color: #59615f;
-        border-bottom: 1pt solid #47664a;
+        color: {COLOR_ON_SURFACE_VARIANT};
+        border-bottom: 1pt solid {COLOR_PRIMARY};
         opacity: 0.8;
         text-align: left;
         padding: 0.35rem 0.6rem;
@@ -1337,10 +1368,10 @@ class RecipeRenderer:
         font-family: 'Work Sans', sans-serif;
         font-size: 0.75rem;
         line-height: 1.35;
-        color: #59615f;
+        color: {COLOR_ON_SURFACE_VARIANT};
     }}
     .instruction-intro-table table tbody tr:nth-child(even) td {{
-        background-color: #f1f4f2;
+        background-color: {COLOR_SURFACE_CONTAINER_LOW};
     }}
     .instruction-intro-table table td:first-child {{
         width: 1%;

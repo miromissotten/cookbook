@@ -12,7 +12,7 @@ import tempfile
 import uuid
 from collections import defaultdict
 from datetime import datetime
-from html import escape
+from html import escape, unescape
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 import io
@@ -64,18 +64,25 @@ from link_injection import (
     inject_navigation,
 )
 from config import (
+    DEFAULT_INPUT_ROOTS,
+    DEFAULT_OUTPUT_STEM,
+    ICON_DIR,
     PAGE_NUMBER_FONT,
     PAGE_NUMBER_FONT_SIZE,
     PAGE_NUMBER_COLOR_RGB,
     PAGE_NUMBER_X_POSITION,
     PAGE_NUMBER_Y_POSITION,
+    TEMP_DIR_PREFIX,
+    PARTIAL_PDF_SUFFIX,
+    BASE_PDF_SUFFIX,
+    TEMP_HTML_STEM,
+    ANNEX_FILENAME,
 )
 from input_roots import PathSpec, find_file, resolve_roots
 from helpers.console_logging import progress, info, warn, error, fatal
 from cookbook_constants import (
     _WIKI_LINK_RE,
     TOC_PAGE_TITLE,
-    cookbook_folder,
     SCATTERPLOT_KIND as _CONST_SCATTERPLOT_KIND,
     RADAR_KIND as _CONST_RADAR_KIND,
     SCATTERPLOT_IMG_STYLE as _CONST_SCATTERPLOT_IMG_STYLE,
@@ -115,8 +122,8 @@ class CookbookGenerator:
         # the first root wins filename collisions.
         if input_dir is None:
             input_dir = [
-                str(_SCRIPT_DIR.parent / cookbook_folder / "text"),
-                str(_SCRIPT_DIR.parent / cookbook_folder / "text_notdone"),
+                str(_SCRIPT_DIR.parent / root)
+                for root in DEFAULT_INPUT_ROOTS
             ]
         self.input_roots = resolve_roots(input_dir)
         # Primary root: kept as ``input_dir`` for existing callers/tests.
@@ -139,7 +146,7 @@ class CookbookGenerator:
             # destroys the other run's sheets mid-layout (observed 2026-08-25:
             # 98 sheets vanished, caught by the pre-conversion guard).
             self.temp_dir = (Path(tempfile.gettempdir())
-                             / f"cookbook_build_{os.getpid()}")
+                             / f"{TEMP_DIR_PREFIX}{os.getpid()}")
         self._build_lock_path: Optional[Path] = None
         self._sweep_stale_temp_dirs()
         
@@ -247,8 +254,8 @@ class CookbookGenerator:
     def _love_heart_path() -> Optional[str]:
         """Locate icon_love.png regardless of the working directory."""
         candidates = [
-            Path("data_modularflavour/icon") / "icon_love.png",
-            _SCRIPT_DIR.parent / "data_modularflavour" / "icon" / "icon_love.png",
+            Path(ICON_DIR) / "icon_love.png",
+            _SCRIPT_DIR.parent / ICON_DIR / "icon_love.png",
         ]
         for candidate in candidates:
             if candidate.exists():
@@ -480,10 +487,14 @@ class CookbookGenerator:
             page_ref = content.strip()
             display_text = None
 
-        page_ref = page_ref.rstrip('\\]')
+        # Recipe text has already been converted from Markdown to HTML by the
+        # time this method sees it, so ampersands in targets and aliases are
+        # HTML entities. Decode them before lookup/output, then escape once so
+        # the generated HTML remains valid and the report shows authored text.
+        page_ref = unescape(page_ref.rstrip('\\]')).strip()
         if display_text is None:
             display_text = page_ref
-        display_text = escape(display_text)
+        display_text = escape(unescape(display_text.strip()))
 
         page_id, _ = self._resolve_wiki_page(page_ref)
 
@@ -704,17 +715,20 @@ class CookbookGenerator:
             return None, None
     
     def _content_page_title(self, content: str, filename: str) -> str:
-        """Display title for a non-recipe page: authored, else filename-derived.
+        """Return a content page's unnumbered title identity.
 
-        Sideinfo pages author their heading in a "### Title" section; every
-        other content page keeps the filename-derived title. Used by both the
-        renderer and the wiki-link pre-scan, so a page's printed heading and
-        its links can never disagree.
+        Sideinfo pages author their heading in a ``### Title`` section. The
+        fallback uses only the descriptive part of a numbered filename because
+        the generator adds the position label separately when rendering. Used
+        by both the renderer and the wiki-link pre-scan, so a page's printed
+        heading and its links can never disagree.
         """
         page_data = self.recipe_parser.parse_content_page(content)
         if page_data.get('title'):
             return page_data['title']
-        return filename.replace('.md', '').replace('_', ' ').title()
+
+        _, filename_title = display_parts(Path(filename).stem)
+        return filename_title.title().strip()
 
     def process_non_recipe_to_html(self, filename: str, content: str, title: str) -> Tuple[str, str]:
         """Process a non-recipe file and return (html_content, html_filepath).
@@ -733,6 +747,9 @@ class CookbookGenerator:
         try:
             page_data = self.recipe_parser.parse_content_page(content)
             page_title = page_data.get('title') or title
+            position_label = self._extract_position_label(filename)
+            if position_label and page_title.startswith(position_label):
+                page_title = page_title[len(position_label):].strip()
 
             body_md = content
             if page_data.get('has_text_section'):
@@ -752,11 +769,11 @@ class CookbookGenerator:
                 body_md, current_page_id=current_page_id,
                 source_filename=filename)
 
-            # A sideinfo page prints its authored title with the filename's
-            # position label, mirroring the recipe pages ("1.1.1. Ramen").
+            # Numbered content pages print the position label separately from
+            # their unnumbered title identity. Mirrors the recipe pages
+            # ("1.1.1. Ramen").
             display_title = page_title
-            if page_data.get('has_text_section'):
-                position_label = self._extract_position_label(filename)
+            if position_label:
                 display_title = f"{position_label} {page_title}".strip()
 
             page_html = ContentPageRenderer().render(
@@ -786,14 +803,15 @@ class CookbookGenerator:
             subtree: The chapter's section dict from the structure hierarchy
         """
         try:
-            # Links targeting this very page degrade to styled text.
-            current_page_id = self._page_id_for_title(title, is_recipe=False)
+            page_title = self._content_page_title(content, filename)
+            current_page_id = self._page_id_for_title(page_title, is_recipe=False)
             prose_html = self.markdown_to_html(
                 content, current_page_id=current_page_id,
                 source_filename=filename)
             chapter_pages = TOCPageRenderer().render_chapter(
                 title, subtree, content_html=prose_html,
-                link_resolver=lambda ref: self._resolve_wiki_page(ref)[0])
+                link_resolver=lambda ref: self._resolve_wiki_page(ref)[0],
+                page_id=current_page_id)
             
             # Write each page to a separate HTML file
             html_paths = []
@@ -1156,7 +1174,7 @@ class CookbookGenerator:
         # variant gets its own suffixed file. The unsuffixed book is retired -
         # there is no single "the PDF" anymore.
         if output_file is None:
-            output_path = self.exports_dir / "cookbook.pdf"
+            output_path = self.exports_dir / f"{DEFAULT_OUTPUT_STEM}.pdf"
         else:
             output_path = Path(output_file)
         book_stem = (output_path.stem if output_path.suffix.lower() == '.pdf'
@@ -1164,10 +1182,8 @@ class CookbookGenerator:
         out_dir = output_path.parent
         variant_paths = {v: out_dir / f"{book_stem}_{v}.pdf"
                          for v in self.variants}
-        partial_target = out_dir / f"{book_stem}_PARTIAL.pdf"
-        # The merged working book lives in the working folder; only variants
-        # ever land in the exports root.
-        merged_base = self.temp_dir / f"{book_stem}_base.pdf"
+        partial_target = out_dir / f"{book_stem}{PARTIAL_PDF_SUFFIX}.pdf"
+        merged_base = self.temp_dir / f"{book_stem}{BASE_PDF_SUFFIX}.pdf"
         return structure_file, book_stem, variant_paths, partial_target, \
             merged_base
 
@@ -1376,11 +1392,15 @@ class CookbookGenerator:
                 chapter = display_parts(
                     chapter_subtrees[filename].get("name", ""))[1]
             is_notdone = self._is_notdone_file(filename)
-            if filename == '_Annex.A. Full Table Of Contents.md':
+            if filename == ANNEX_FILENAME:
                 title = filename.replace('.md', '').replace('_', ' ').title()
+                content = self.read_markdown_file(filename)
+                page_title = self._content_page_title(content, filename)
+                page_id = self._page_id_for_title(page_title, is_recipe=False)
                 full_toc_html = TOCPageRenderer().render_full_toc(
                     title, hierarchy,
                     link_resolver=lambda ref: self._resolve_wiki_page(ref)[0],
+                    page_id=page_id,
                 )
                 full_toc_file = self._write_temp_html('temp_full_toc', full_toc_html)
                 pdf_jobs.append((str(full_toc_file), TOC_PAGE_TITLE, '', False))
@@ -1462,7 +1482,7 @@ class CookbookGenerator:
                 files,
                 str(pdf_path),
                 footer_html,
-                temp_html_name=f"temp_combined_{idx:03d}.html",
+                temp_html_name=f"{TEMP_HTML_STEM}_{idx:03d}.html",
                 measure_cb=_measure_navigation,
                 measure_result=measured_batch,
             )

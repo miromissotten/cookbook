@@ -14,6 +14,27 @@ from pathlib import Path
 import nest_asyncio
 nest_asyncio.apply()
 
+from config import (
+    PAGE_LOAD_TIMEOUT_MS,
+    PAGE_W_PT,
+    PAGE_H_PT,
+    PX_TO_PT,
+    A4_WIDTH_MM,
+    A4_HEIGHT_MM,
+    PAGE_BOX_SHADOW,
+    PAGE_BG,
+    PAGE_SIZE,
+    PAGE_BREAK_AFTER,
+    RENDER_SETTLED_TIMEOUT_MS,
+    FORCE_DEVICE_SCALE_FACTOR,
+    VIEWPORT_WIDTH,
+    VIEWPORT_HEIGHT,
+    COLOR_PRIMARY,
+    COLOR_ON_SURFACE,
+    COLOR_ON_SURFACE_VARIANT,
+    COLOR_PRIMARY_RGB,
+)
+
 from typing import List, Optional
 
 # Import mermaid renderer functions at module level to avoid import issues in async contexts
@@ -40,7 +61,7 @@ def _get_browser():
         from playwright.sync_api import sync_playwright
         _playwright = sync_playwright().start()
         # Force device scale factor to 1 to avoid Windows DPI scaling shrinking PDF content.
-        _browser = _playwright.chromium.launch(args=['--force-device-scale-factor=1'])
+        _browser = _playwright.chromium.launch(args=[f'--force-device-scale-factor={FORCE_DEVICE_SCALE_FACTOR}'])
         # Share this browser with mermaid_renderer so both use the same instance
         set_mermaid_browser(_browser)
         return _browser
@@ -65,7 +86,7 @@ def _close_browser():
         _playwright.stop()
         _playwright = None
 
-PAGE_LOAD_TIMEOUT = 120000  # 120 seconds in milliseconds
+PAGE_LOAD_TIMEOUT = PAGE_LOAD_TIMEOUT_MS
 
 # Marker element embedded in every sheet template; replaced with the real
 # in-page footer right before conversion. Must be a plain element (not a
@@ -88,14 +109,14 @@ def _path_to_uri(path_str: str) -> str:
 def wait_for_render_settled(page) -> None:
     """Wait until webfonts and any client-side mermaid rendering have settled."""
     try:
-        page.wait_for_function("() => document.fonts.status === 'loaded'", timeout=15000)
+        page.wait_for_function("() => document.fonts.status === 'loaded'", timeout=RENDER_SETTLED_TIMEOUT_MS)
     except Exception:
         pass
     try:
         page.wait_for_function(
             "() => document.querySelectorAll('.mermaid').length === 0 || "
             "document.querySelectorAll('.mermaid svg').length > 0",
-            timeout=15000
+            timeout=RENDER_SETTLED_TIMEOUT_MS
         )
     except Exception:
         pass
@@ -202,7 +223,7 @@ def _convert_single_to_pdf(input_file: str, output_file: str, footer_html: Optio
                 load_path = footer_tmp
         
         browser = _get_browser()
-        page = browser.new_page(viewport={"width": 794, "height": 1123}, device_scale_factor=1)
+        page = browser.new_page(viewport={"width": VIEWPORT_WIDTH, "height": VIEWPORT_HEIGHT}, device_scale_factor=FORCE_DEVICE_SCALE_FACTOR)
 
         # Convert the absolute path to a proper encoded URI (handles spaces and special chars)
         input_path_obj = Path(input_file).resolve()
@@ -269,8 +290,8 @@ def _convert_single_to_pdf(input_file: str, output_file: str, footer_html: Optio
         # physical page box is exactly A4 with zero print margins.
         page.pdf(
             path=output_file,
-            width='210mm',
-            height='297mm',
+            width=f'{A4_WIDTH_MM}mm',
+            height=f'{A4_HEIGHT_MM}mm',
             print_background=True,
             display_header_footer=False,
             margin={'top': '0mm', 'bottom': '0mm', 'left': '0mm', 'right': '0mm'}
@@ -473,17 +494,13 @@ def combine_html_files(html_files: List[str], output_file: str = None) -> str:
     combined_html += '<title>Combined Cookbook</title>\n'
     combined_html += combined_head_markup
     combined_html += '<style>\n'
-    combined_html += 'html, body { margin: 0; padding: 0; }\n'
-    combined_html += 'body { display: block; background: white; width: 210mm; max-width: 210mm; overflow-x: hidden; }\n'
-    combined_html += '@page { size: A4; margin: 0; }\n'
-    # Force page containers to A4 width and clip horizontal overflow.
-    # Without this a single unbreakable word in an h1 (e.g. a long filename)
-    # widens body.scrollWidth past 210mm and Chrome fit-to-page-scales the whole PDF.
-    combined_html += '.a4-page, .recipe-page { width: 210mm !important; max-width: 210mm !important; box-sizing: border-box; }\n'
-    # Pin the exact sheet box so every source yields whole physical pages.
-    combined_html += '.a4-page, .recipe-page { height: 297mm !important; position: relative !important; isolation: isolate !important; overflow: hidden !important; }\n'
-    combined_html += '.a4-page, .recipe-page { page-break-after: always; break-after: page; }\n'
-    combined_html += '.a4-page:last-child, .recipe-page:last-child { page-break-after: auto; break-after: auto; }\n'
+    combined_html += f'html, body {{ margin: 0; padding: 0; }}\n'
+    combined_html += f'body {{ display: block; background: {PAGE_BG}; width: {A4_WIDTH_MM}mm; max-width: {A4_WIDTH_MM}mm; overflow-x: hidden; }}\n'
+    combined_html += f'@page {{ size: {PAGE_SIZE}; margin: 0; }}\n'
+    combined_html += f'.a4-page, .recipe-page {{ width: {A4_WIDTH_MM}mm !important; max-width: {A4_WIDTH_MM}mm !important; box-sizing: border-box; }}\n'
+    combined_html += f'.a4-page, .recipe-page {{ height: {A4_HEIGHT_MM}mm !important; position: relative !important; isolation: isolate !important; overflow: hidden !important; }}\n'
+    combined_html += f'.a4-page, .recipe-page {{ {PAGE_BREAK_AFTER}-after: {PAGE_BREAK_AFTER}; }}\n'
+    combined_html += f'.a4-page:last-child, .recipe-page:last-child {{ {PAGE_BREAK_AFTER}-after: auto; }}\n'
     # Break long unbreakable words inside page titles so they wrap instead of overflowing.
     combined_html += '.recipe-page h1, .a4-page h1 { overflow-wrap: anywhere; word-break: break-word; }\n'
     combined_html += 'main { display: contents; }\n'
@@ -529,15 +546,15 @@ def build_inpage_footer(chapter: str = '', section: str = '', start_page: int = 
         'style="position:absolute;left:0;right:0;bottom:0;z-index:-1;'
         '-webkit-print-color-adjust:exact;print-color-adjust:exact;width:100%;'
         "font-family:'Plus Jakarta Sans',Manrope,Arial,sans-serif;"
-        'color:#59615f;margin:0;padding:0;box-sizing:border-box;">'
+        'color:{COLOR_ON_SURFACE_VARIANT};margin:0;padding:0;box-sizing:border-box;">'
         '<div style="width:100%;height:2mm;"></div>'
         '<div style="width:100%;display:flex;justify-content:space-between;align-items:center;'
-        'padding:2mm 15mm 2mm 25mm;border-top:1.5pt solid #47664a;opacity:0.4;box-sizing:border-box;">'
+        'padding:2mm 15mm 2mm 25mm;border-top:1.5pt solid {COLOR_PRIMARY};opacity:0.4;box-sizing:border-box;">'
         '<span style="font-size:8pt;font-weight:500;letter-spacing:0.18em;text-transform:uppercase;'
-        f'color:#59615f;">{left_text}</span>'
-        '<span style="font-size:8pt;font-weight:700;letter-spacing:0.12em;color:#2d3432;"></span>'
+        f'color:{COLOR_ON_SURFACE_VARIANT};">{left_text}</span>'
+        '<span style="font-size:8pt;font-weight:700;letter-spacing:0.12em;color:{COLOR_ON_SURFACE};"></span>'
         '</div>'
-        '<div style="width:100%;height:2mm;background-color:#47664a;opacity:0.8;"></div>'
+        '<div style="width:100%;height:2mm;background-color:{COLOR_PRIMARY};opacity:0.8;"></div>'
         '</div>'
     )
 

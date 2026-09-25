@@ -36,8 +36,22 @@ import re
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+from config import (
+    PAGE_LOAD_TIMEOUT_MS,
+    VIEWPORT_WIDTH,
+    VIEWPORT_HEIGHT,
+    FORCE_DEVICE_SCALE_FACTOR,
+    SPLITTER_EPS,
+    SPLITTER_MIN_SCALE,
+    SPLITTER_JOIN_FLOOR,
+    SPLITTER_TABLE_CHUNK_MAX,
+    SPLITTER_SLIVER_MIN,
+    SPLITTER_TOC_SECTION_HEIGHT_THRESHOLD,
+    SPLITTER_TOC_CHUNK_MAX,
+    SPLITTER_LIST_CHUNK_HEIGHT_THRESHOLD,
+)
+
 from html_to_pdf import (
-    PAGE_LOAD_TIMEOUT,
     _get_browser,
     _path_to_uri,
     wait_for_render_settled,
@@ -1956,7 +1970,7 @@ def split_page_file(html_path: str) -> Optional[List[Tuple[str, str]]]:
     page.emulate_media(media="print")
     try:
         page.goto(_path_to_uri(str(path.resolve())),
-                  timeout=PAGE_LOAD_TIMEOUT, wait_until="networkidle")
+                  timeout=PAGE_LOAD_TIMEOUT_MS, wait_until="networkidle")
         wait_for_render_settled(page)
         # Grace period so the Tailwind CDN JIT settles after font load.
         page.wait_for_timeout(150)

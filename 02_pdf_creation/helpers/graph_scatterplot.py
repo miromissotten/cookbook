@@ -14,6 +14,21 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+from config import (
+    COLOR_ON_SURFACE,
+    COLOR_OUTLINE_VARIANT,
+    COLOR_PRIMARY,
+    COLOR_SURFACE_CONTAINER_LOW,
+    COLOR_WHITE,
+    SCATTER_FIGSIZE,
+    SCATTER_MARKER_SIZE,
+    SCATTER_ALPHA,
+    SCATTER_DPI,
+    SCATTER_LABEL_FONT_SIZE,
+    SCATTER_AXIS_FONT_SIZE,
+    SCATTER_TITLE_FONT_SIZE,
+)
+
 
 _COL_STYLE = 1
 _COL_X = 2
@@ -82,8 +97,8 @@ def render_scatterplot_png(table_text: str, output_path: str,
     xs = [r[1] for r in rows]
     ys = [r[2] for r in rows]
 
-    fig, ax = plt.subplots(figsize=(8, 5))
-    ax.scatter(xs, ys, s=120, alpha=0.75, color="#47664a", edgecolors="#2d3432", linewidths=0.5)
+    fig, ax = plt.subplots(figsize=SCATTER_FIGSIZE)
+    ax.scatter(xs, ys, s=SCATTER_MARKER_SIZE, alpha=SCATTER_ALPHA, color=COLOR_PRIMARY, edgecolors=COLOR_ON_SURFACE, linewidths=0.5)
 
     for i, style in enumerate(styles):
         y_offset = 6 if i % 2 == 0 else -16
@@ -92,22 +107,22 @@ def render_scatterplot_png(table_text: str, output_path: str,
             (xs[i], ys[i]),
             textcoords="offset points",
             xytext=(6, y_offset),
-            fontsize=9,
-            color="#2d3432",
+            fontsize=SCATTER_LABEL_FONT_SIZE,
+            color=COLOR_ON_SURFACE,
         )
 
-    ax.set_xlabel(x_label, fontsize=11, color="#2d3432")
-    ax.set_ylabel(y_label, fontsize=11, color="#2d3432")
-    ax.set_title(chart_title, fontsize=13, fontweight="bold", color="#2d3432")
-    ax.grid(True, alpha=0.25, color="#acb4b1")
-    fig.patch.set_facecolor("#ffffff")
-    ax.set_facecolor("#f1f4f2")
+    ax.set_xlabel(x_label, fontsize=SCATTER_AXIS_FONT_SIZE, color=COLOR_ON_SURFACE)
+    ax.set_ylabel(y_label, fontsize=SCATTER_AXIS_FONT_SIZE, color=COLOR_ON_SURFACE)
+    ax.set_title(chart_title, fontsize=SCATTER_TITLE_FONT_SIZE, fontweight="bold", color=COLOR_ON_SURFACE)
+    ax.grid(True, alpha=0.25, color=COLOR_OUTLINE_VARIANT)
+    fig.patch.set_facecolor(COLOR_WHITE)
+    ax.set_facecolor(COLOR_SURFACE_CONTAINER_LOW)
     for spine in ax.spines.values():
-        spine.set_color("#acb4b1")
+        spine.set_color(COLOR_OUTLINE_VARIANT)
 
     plt.tight_layout()
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(output_path, dpi=150, bbox_inches="tight", facecolor="#ffffff")
+    plt.savefig(output_path, dpi=SCATTER_DPI, bbox_inches="tight", facecolor=COLOR_WHITE)
     plt.close(fig)
 
     return Path(output_path).resolve().as_uri()
