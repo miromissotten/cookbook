@@ -245,7 +245,8 @@ class TOCPageRenderer:
 
         toc_html = self._generate_chapter_tree_html(
             subtree, link_resolver, max_depth)
-        pages.append(self._build_toc_page(title, toc_html, page_anchor=anchor))
+        if 'toc-level-' in toc_html:
+            pages.append(self._build_toc_page(title, toc_html, page_anchor=anchor))
 
         return pages
 
